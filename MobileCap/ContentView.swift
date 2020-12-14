@@ -8,12 +8,14 @@
 import SwiftUI
 import AVFoundation
 
-class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate {
+class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCaptureFileOutputRecordingDelegate {
     var captureSession: AVCaptureSession?
     var frontCamera: AVCaptureDevice?
     var frontCameraInput: AVCaptureDeviceInput?
     var previewLayer: AVCaptureVideoPreviewLayer?
     var metadataOutput: AVCaptureMetadataOutput?
+    var videoOutput: AVCaptureMovieFileOutput?
+    var sessionStatusUrl = "https://mobilecap.kidzinski.com"
 
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
         captureSession?.removeOutput(self.metadataOutput!)
@@ -21,7 +23,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate {
             guard let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject else { return }
             guard let stringValue = readableObject.stringValue else { return }
             AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
-            print(stringValue)
+            self.sessionStatusUrl = stringValue
         }
     }
 
@@ -94,7 +96,10 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate {
                     
                     self.metadataOutput!
                         .metadataObjectTypes = [.qr]
-                    print("configured")
+                    print("configured metadata")
+                    
+                    self.videoOutput = AVCaptureMovieFileOutput()
+                    captureSession.addOutput(self.videoOutput!)
                 }
                 else{
                     print("Can't configure")
@@ -127,6 +132,33 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate {
         }
     }
     
+    func recordVideo() {
+        guard let captureSession = self.captureSession, captureSession.isRunning else {
+//            completion(nil, CameraControllerError.captureSessionIsMissing)
+            return
+        }
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        let fileUrl = paths[0].appendingPathComponent("output.mp4")
+        try? FileManager.default.removeItem(at: fileUrl)
+        videoOutput!.startRecording(to: fileUrl, recordingDelegate: self)
+        print("RECORDING STARTED")
+//        self.videoRecordCompletionBlock = completion
+    }
+    func stopRecording() {
+        guard let captureSession = self.captureSession, captureSession.isRunning else {
+//            completion(CameraControllerError.captureSessionIsMissing)
+            return
+        }
+        self.videoOutput?.stopRecording()
+    }
+    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
+        if error == nil {
+            print("Recorded")
+        } else {
+            print("ERROR")
+        }
+    }
+    
     func displayPreview(on view: UIView) throws {
         guard let captureSession = self.captureSession, captureSession.isRunning else { throw CameraControllerError.captureSessionIsMissing }
             
@@ -149,12 +181,41 @@ enum CameraControllerError: Swift.Error {
 }
 
 final class CameraViewController: UIViewController {
-    
+    weak var timer: Timer?
+
     let cameraController = CameraController()
     var previewView: UIView!
     
     override func viewDidLoad() {
-                    
+        timer = Timer.scheduledTimer(withTimeInterval: 1,
+                                      repeats: true,
+                                      block: { [weak self] timer in
+                                        let url = URL(string: self!.cameraController.sessionStatusUrl)!
+
+         let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
+             guard let data = data else { return }
+             // print(String(data: data, encoding: .utf8)!)
+            
+            let json = try? JSONSerialization.jsonObject(with: data, options: [])
+            
+//            print("JSON")
+            if let dictionary = json as? [String: Any] {
+//                print(dictionary)
+                if let status = dictionary["status"] as? String {
+                    print(status)
+                }
+                if let sessions = dictionary["sessions"] as? String {
+                    print(sessions)
+                }
+            }
+            // if no "status" continue
+            // if data["status"] == "recording" then start recording
+            // if data["status"] == "uploading" then stop recording and submit the video
+         }
+
+         task.resume()
+        })
+
         previewView = UIView(frame: CGRect(x:0, y:0, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.height))
         previewView.contentMode = UIView.ContentMode.scaleAspectFit
         view.addSubview(previewView)
@@ -166,6 +227,7 @@ final class CameraViewController: UIViewController {
             
             try? self.cameraController.displayPreview(on: self.previewView)
         }
+        cameraController.recordVideo()
     }
 }
 
@@ -181,24 +243,11 @@ extension CameraViewController : UIViewControllerRepresentable{
 }
 
 struct ContentView: View {
-    let timer = Timer.publish(every: 1,
-                              tolerance: 0.5,
-                              on: .main, in: .common).autoconnect()
 
     var body: some View {
         CameraViewController()
             .edgesIgnoringSafeArea(.top)
-            .onReceive(timer) { time in
-                let url = URL(string: "https://mobilecap.kidzinski.com")!
-
-/*                let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
-                    guard let data = data else { return }
-                    print(String(data: data, encoding: .utf8)!)
-                }
-
-                task.resume()*/
-            }
-    }
+   }
 }
 
 struct ContentView_Previews: PreviewProvider {
