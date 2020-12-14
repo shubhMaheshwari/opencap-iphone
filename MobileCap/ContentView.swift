@@ -23,7 +23,8 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             guard let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject else { return }
             guard let stringValue = readableObject.stringValue else { return }
             AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
-            self.sessionStatusUrl = stringValue
+            self.sessionStatusUrl = stringValue + "?device_id=test"
+            print(self.sessionStatusUrl)
         }
     }
 
@@ -185,6 +186,7 @@ final class CameraViewController: UIViewController {
 
     let cameraController = CameraController()
     var previewView: UIView!
+    var previousStatus = "ready"
     
     override func viewDidLoad() {
         timer = Timer.scheduledTimer(withTimeInterval: 1,
@@ -200,12 +202,18 @@ final class CameraViewController: UIViewController {
             
 //            print("JSON")
             if let dictionary = json as? [String: Any] {
-//                print(dictionary)
+                print(dictionary)
                 if let status = dictionary["status"] as? String {
                     print(status)
-                }
-                if let sessions = dictionary["sessions"] as? String {
-                    print(sessions)
+                    if (self!.previousStatus != status && status == "recording")
+                    {
+                        self?.cameraController.recordVideo()
+                    }
+                    if (self!.previousStatus != status && status == "uploading")
+                    {
+                        self?.cameraController.stopRecording()
+                    }
+                    self?.previousStatus = status
                 }
             }
             // if no "status" continue
