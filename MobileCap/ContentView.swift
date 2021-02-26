@@ -111,9 +111,13 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
                 }
             }
             else { throw CameraControllerError.noCamerasAvailable }
-               
+            
+            try self.frontCamera?.lockForConfiguration()
+            self.frontCamera?.setFocusModeLocked(lensPosition: 0.5) {
+                (time:CMTime) -> Void in
+            }
+            self.frontCamera?.unlockForConfiguration()
             captureSession.startRunning()
-               
         }
            
         DispatchQueue(label: "prepare").async {
