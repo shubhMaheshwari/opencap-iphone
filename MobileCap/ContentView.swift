@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AVFoundation
+import Alamofire
 
 class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCaptureFileOutputRecordingDelegate {
     var captureSession: AVCaptureSession?
@@ -15,7 +16,10 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
     var previewLayer: AVCaptureVideoPreviewLayer?
     var metadataOutput: AVCaptureMetadataOutput?
     var videoOutput: AVCaptureMovieFileOutput?
-    var sessionStatusUrl = "https://mobilecap.kidzinski.com"
+    var apiUrl = "https://api.mobilecap.kidzinski.com"
+    var sessionStatusUrl = "https://api.mobilecap.kidzinski.com"
+    var trialLink: String?
+    var videoLink: String?
 
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
         captureSession?.removeOutput(self.metadataOutput!)
@@ -23,7 +27,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             guard let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject else { return }
             guard let stringValue = readableObject.stringValue else { return }
             AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
-            self.sessionStatusUrl = stringValue + "?device_id=test"
+            self.sessionStatusUrl = stringValue + "?device_id=" + UIDevice.current.identifierForVendor!.uuidString
             print(self.sessionStatusUrl)
         }
     }
@@ -83,7 +87,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
                
             if let frontCamera = self.frontCamera {
                 self.frontCameraInput = try AVCaptureDeviceInput(device: frontCamera)
-                   
+                
                 if captureSession.canAddInput(self.frontCameraInput!) { captureSession.addInput(self.frontCameraInput!)}
                 else { throw CameraControllerError.inputsAreInvalid }
                 
@@ -139,22 +143,60 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             return
         }
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-        let fileUrl = paths[0].appendingPathComponent("output.mp4")
-        try? FileManager.default.removeItem(at: fileUrl)
-        videoOutput!.startRecording(to: fileUrl, recordingDelegate: self)
-        print("RECORDING STARTED")
+        
+        let trialString = trialLink!.replacingOccurrences(of: "/", with: "")
+        let videoUrl = paths[0].appendingPathComponent(trialString + UIDevice.current.identifierForVendor!.uuidString + ".mov")
+        try? FileManager.default.removeItem(at: videoUrl)
+        let connection = videoOutput!.connection(with: .video)!
+        // enable the flag
+        if #available(iOS 11.0, *), connection.isCameraIntrinsicMatrixDeliverySupported {
+            connection.isCameraIntrinsicMatrixDeliveryEnabled = true
+        }
+        
+        videoOutput!.startRecording(to: videoUrl, recordingDelegate: self)
+        print("RECORDING STARTED: " + videoUrl.absoluteString)
 //        self.videoRecordCompletionBlock = completion
     }
     func stopRecording() {
-        guard let captureSession = self.captureSession, captureSession.isRunning else {
-//            completion(CameraControllerError.captureSessionIsMissing)
-            return
-        }
         self.videoOutput?.stopRecording()
+    }
+    func captureOutput(_ captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, from connection: AVCaptureConnection!){
+        let connection = videoOutput!.connection(with: .video)!
+        if #available(iOS 11.0, *), connection.isCameraIntrinsicMatrixDeliverySupported {
+            if let camData = CMGetAttachment(sampleBuffer, key:kCMSampleBufferAttachmentKey_CameraIntrinsicMatrix, attachmentModeOut:nil) as? Data {
+                let matrix: matrix_float3x3 = camData.withUnsafeBytes { $0.pointee }
+                print(matrix)
+            }
+        }
     }
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
         if error == nil {
-            print("Recorded")
+            print("RECORDED")
+            print("Sending: " + outputFileURL.absoluteString)
+            let file = try? Data(contentsOf: outputFileURL)
+                
+            let headers: HTTPHeaders = [
+                "Content-type": "multipart/form-data"
+            ]
+
+            let videoURL = URL(string: self.apiUrl + self.videoLink!)
+
+            if (file != nil){
+                print("Updating video: " + videoURL!.absoluteString)
+                let sfov = String(self.frontCamera!.activeFormat.videoFieldOfView.description)
+                let parameters = Data(("{\"fov\":"+sfov+"}").utf8)
+                AF.upload(
+                    multipartFormData: { multipartFormData in
+                        multipartFormData.append(file!, withName: "video" , fileName: "recording.mov", mimeType: "video/mp4")
+                        multipartFormData.append(parameters, withName: "parameters")
+                },
+                    to: videoURL!, method: .patch , headers: headers)
+                    .response { response in
+                        if let data = response.data{
+                            print(data)
+                        }
+                    }
+                }
         } else {
             print("ERROR")
         }
@@ -189,20 +231,30 @@ final class CameraViewController: UIViewController {
     var previousStatus = "ready"
     
     override func viewDidLoad() {
+        UIApplication.shared.isIdleTimerDisabled = true
+
+        let localURL = URL(fileURLWithPath: "file.txt")
+        try? "Some string".write(to: localURL, atomically: true, encoding: .utf8)
+        
         timer = Timer.scheduledTimer(withTimeInterval: 1,
                                       repeats: true,
                                       block: { [weak self] timer in
                                         let url = URL(string: self!.cameraController.sessionStatusUrl)!
-
+                                                                                
          let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
              guard let data = data else { return }
              // print(String(data: data, encoding: .utf8)!)
             
             let json = try? JSONSerialization.jsonObject(with: data, options: [])
             
-//            print("JSON")
+            print(json)
             if let dictionary = json as? [String: Any] {
-                print(dictionary)
+                if let video = dictionary["video"] as? String {
+                    self!.cameraController.videoLink = video
+                }
+                if let trial = dictionary["trial"] as? String {
+                    self!.cameraController.trialLink = trial
+                }
                 if let status = dictionary["status"] as? String {
                     print(status)
                     if (self!.previousStatus != status && status == "recording")

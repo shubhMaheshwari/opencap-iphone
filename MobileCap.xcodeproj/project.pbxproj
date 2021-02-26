@@ -3,10 +3,11 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1F90AF0B258D20B400F9404A /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 1F90AF0A258D20B400F9404A /* Alamofire */; };
 		1FA1DCD32585CE14002AC3BA /* MobileCapApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FA1DCD22585CE14002AC3BA /* MobileCapApp.swift */; };
 		1FA1DCD52585CE14002AC3BA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FA1DCD42585CE14002AC3BA /* ContentView.swift */; };
 		1FA1DCD72585CE15002AC3BA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1FA1DCD62585CE15002AC3BA /* Assets.xcassets */; };
@@ -28,6 +29,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1F90AF0B258D20B400F9404A /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -95,6 +97,9 @@
 			dependencies = (
 			);
 			name = MobileCap;
+			packageProductDependencies = (
+				1F90AF0A258D20B400F9404A /* Alamofire */,
+			);
 			productName = MobileCap;
 			productReference = 1FA1DCCF2585CE14002AC3BA /* MobileCap.app */;
 			productType = "com.apple.product-type.application";
@@ -122,6 +127,9 @@
 				Base,
 			);
 			mainGroup = 1FA1DCC62585CE14002AC3BA;
+			packageReferences = (
+				1F90AF06258D1D7100F9404A /* XCRemoteSwiftPackageReference "Alamofire" */,
+			);
 			productRefGroup = 1FA1DCD02585CE14002AC3BA /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -278,6 +286,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_ASSET_PATHS = "\"MobileCap/Preview Content\"";
 				DEVELOPMENT_TEAM = C785C9X8KV;
 				ENABLE_PREVIEWS = YES;
@@ -287,6 +296,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.stanfordnmbl.MobileCap;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -300,6 +310,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_ASSET_PATHS = "\"MobileCap/Preview Content\"";
 				DEVELOPMENT_TEAM = C785C9X8KV;
 				ENABLE_PREVIEWS = YES;
@@ -309,6 +320,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.stanfordnmbl.MobileCap;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -338,6 +350,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1F90AF06258D1D7100F9404A /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.4.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1F90AF0A258D20B400F9404A /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F90AF06258D1D7100F9404A /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 1FA1DCC72585CE14002AC3BA /* Project object */;
 }
