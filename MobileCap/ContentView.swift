@@ -188,7 +188,18 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             if (file != nil){
                 print("Updating video: " + videoURL!.absoluteString)
                 let sfov = String(self.frontCamera!.activeFormat.videoFieldOfView.description)
-                let parameters = Data(("{\"fov\":"+sfov+"}").utf8)
+                
+                // Get the model as per https://www.zerotoappstore.com/how-to-get-iphone-device-model-swift.html
+                var systemInfo = utsname()
+                uname(&systemInfo)
+                let modelCode = withUnsafePointer(to: &systemInfo.machine) {
+                    $0.withMemoryRebound(to: CChar.self, capacity: 1) {
+                        ptr in String.init(validatingUTF8: ptr)
+                    }
+                }
+                
+                let parameters = Data(("{\"fov\":"+sfov+",\"model\":\""+modelCode+"\"}").utf8)
+                
                 AF.upload(
                     multipartFormData: { multipartFormData in
                         multipartFormData.append(file!, withName: "video" , fileName: "recording.mov", mimeType: "video/mp4")
