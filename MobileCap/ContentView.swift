@@ -20,6 +20,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
     var sessionStatusUrl = "https://api.mobilecap.kidzinski.com"
     var trialLink: String?
     var videoLink: String?
+    var lensPosition = Float(0.8)
 
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
         captureSession?.removeOutput(self.metadataOutput!)
@@ -112,11 +113,6 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             }
             else { throw CameraControllerError.noCamerasAvailable }
             
-            try self.frontCamera?.lockForConfiguration()
-            self.frontCamera?.setFocusModeLocked(lensPosition: 0.5) {
-                (time:CMTime) -> Void in
-            }
-            self.frontCamera?.unlockForConfiguration()
             captureSession.startRunning()
         }
            
@@ -142,6 +138,20 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
     }
     
     func recordVideo() {
+        do {
+            try self.frontCamera?.lockForConfiguration()
+        }
+        catch {
+            return
+        }
+        
+        self.frontCamera?.setFocusModeLocked(lensPosition: lensPosition) {
+            (time:CMTime) -> Void in
+        }
+        
+        self.frontCamera?.unlockForConfiguration()
+
+        
         guard let captureSession = self.captureSession, captureSession.isRunning else {
 //            completion(nil, CameraControllerError.captureSessionIsMissing)
             return
@@ -251,10 +261,12 @@ final class CameraViewController: UIViewController {
             
             let json = try? JSONSerialization.jsonObject(with: data, options: [])
             
-            print(json)
             if let dictionary = json as? [String: Any] {
                 if let video = dictionary["video"] as? String {
                     self!.cameraController.videoLink = video
+                }
+                if let lenspos = dictionary["lenspos"] as? Float {
+                    self!.cameraController.lensPosition = lenspos
                 }
                 if let trial = dictionary["trial"] as? String {
                     self!.cameraController.trialLink = trial
