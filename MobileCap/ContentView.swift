@@ -207,8 +207,9 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
                         ptr in String.init(validatingUTF8: ptr)
                     }
                 }
-                
-                let parameters = Data(("{\"fov\":"+sfov+",\"model\":\""+modelCode+"\"}").utf8)
+                let modelCodeStr = String(modelCode!)
+                let jsonparam = "{\"fov\":"+sfov+",\"model\":\""+modelCodeStr+"\"}"
+                let parameters = Data(jsonparam.utf8)
                 
                 AF.upload(
                     multipartFormData: { multipartFormData in
