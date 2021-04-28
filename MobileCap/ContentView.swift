@@ -21,6 +21,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
     var trialLink: String?
     var videoLink: String?
     var lensPosition = Float(0.8)
+    var bestFormat: AVCaptureDevice.Format?
 
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
         captureSession?.removeOutput(self.metadataOutput!)
@@ -52,6 +53,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
                     }
                 }
             }
+            self.bestFormat = bestFormat
             
             if let bestFormat = bestFormat,
                let bestFrameRateRange = bestFrameRateRange {
@@ -60,14 +62,9 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
                     
                     // Set the device's active format.
                     device.activeFormat = bestFormat
-                    
-                    // Set the device's min/max frame duration.
-                    let duration = bestFrameRateRange.minFrameDuration
-                    device.activeVideoMinFrameDuration = duration
-                    device.activeVideoMaxFrameDuration = duration
-                    
                     device.unlockForConfiguration()
                 } catch {
+                    print("Can't change the framerate")
                     // Handle error.
                 }
             }
@@ -137,7 +134,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
         }
     }
     
-    func recordVideo() {
+    func recordVideo(frameRate: Int32) {
         do {
             try self.frontCamera?.lockForConfiguration()
         }
@@ -148,7 +145,18 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
         self.frontCamera?.setFocusModeLocked(lensPosition: lensPosition) {
             (time:CMTime) -> Void in
         }
+        if let bestFormat = self.bestFormat {
+            self.frontCamera!.activeFormat = bestFormat
+            // Set the device's min/max frame duration.
+            let duration = CMTimeMake(value:1,timescale:frameRate)
+            self.frontCamera?.activeVideoMinFrameDuration = duration
+            self.frontCamera?.activeVideoMaxFrameDuration = duration
+            let durationSec =  Float(CMTimeGetSeconds(duration))
+            print("Duration set to "+String(format: "%.2f", durationSec))
+        }
+        print(self.frontCamera?.activeFormat ?? "No camera set yet")
         
+
         self.frontCamera?.unlockForConfiguration()
 
         
@@ -186,6 +194,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
         if error == nil {
             print("RECORDED")
+            print("seconds = %f", CMTimeGetSeconds(frontCamera!.activeVideoMaxFrameDuration))
             print("Sending: " + outputFileURL.absoluteString)
             let file = try? Data(contentsOf: outputFileURL)
                 
@@ -287,7 +296,11 @@ final class CameraViewController: UIViewController {
                     print(status)
                     if (self!.previousStatus != status && status == "recording")
                     {
-                        self?.cameraController.recordVideo()
+                        var frameRate = Int32(60)
+                        if let desiredFrameRate = dictionary["framerate"] as? Int32 {
+                            frameRate = desiredFrameRate
+                        }
+                        self?.cameraController.recordVideo(frameRate: frameRate)
                     }
                     if (self!.previousStatus != status && status == "uploading")
                     {
@@ -315,7 +328,7 @@ final class CameraViewController: UIViewController {
             
             try? self.cameraController.displayPreview(on: self.previewView)
         }
-        cameraController.recordVideo()
+        //cameraController.recordVideo()
     }
 }
 
