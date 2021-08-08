@@ -47,6 +47,9 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             for format in device.formats {
                 for range in format.videoSupportedFrameRateRanges {
                     print(format)
+                    if CMVideoFormatDescriptionGetDimensions(format.formatDescription).width < 4032 {
+                        continue
+                    }
                     if range.maxFrameRate > bestFrameRateRange?.maxFrameRate ?? 0 {
                         bestFormat = format
                         bestFrameRateRange = range
@@ -173,6 +176,9 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
         // enable the flag
         if #available(iOS 11.0, *), connection.isCameraIntrinsicMatrixDeliverySupported {
             connection.isCameraIntrinsicMatrixDeliveryEnabled = true
+        }
+        if (connection.isVideoStabilizationSupported) {
+            connection.preferredVideoStabilizationMode = AVCaptureVideoStabilizationMode.auto;
         }
         
         videoOutput!.startRecording(to: videoUrl, recordingDelegate: self)
