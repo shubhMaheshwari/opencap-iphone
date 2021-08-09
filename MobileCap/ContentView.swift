@@ -47,7 +47,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             for format in device.formats {
                 for range in format.videoSupportedFrameRateRanges {
                     print(format)
-                    if CMVideoFormatDescriptionGetDimensions(format.formatDescription).width < 4032 {
+                    if CMVideoFormatDescriptionGetDimensions(format.formatDescription).width != 3840 {
                         continue
                     }
                     if range.maxFrameRate > bestFrameRateRange?.maxFrameRate ?? 0 {
@@ -178,7 +178,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             connection.isCameraIntrinsicMatrixDeliveryEnabled = true
         }
         if (connection.isVideoStabilizationSupported) {
-            connection.preferredVideoStabilizationMode = AVCaptureVideoStabilizationMode.auto;
+            connection.preferredVideoStabilizationMode = AVCaptureVideoStabilizationMode.off;
         }
         
         videoOutput!.startRecording(to: videoUrl, recordingDelegate: self)
