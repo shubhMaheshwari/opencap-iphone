@@ -47,9 +47,9 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             for format in device.formats {
                 for range in format.videoSupportedFrameRateRanges {
                     print(format)
-//                    if CMVideoFormatDescriptionGetDimensions(format.formatDescription).width != 3840 {
-//                        continue
-//                    }
+                    if CMVideoFormatDescriptionGetDimensions(format.formatDescription).width != 3840 {
+                        continue
+                    }
                     if range.maxFrameRate > bestFrameRateRange?.maxFrameRate ?? 0 {
                         bestFormat = format
                         bestFrameRateRange = range
@@ -155,8 +155,8 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             self.frontCamera!.activeFormat = bestFormat
             // Set the device's min/max frame duration.
             let duration = CMTimeMake(value:1,timescale:frameRate)
-//            self.frontCamera?.activeVideoMinFrameDuration = duration
-//            self.frontCamera?.activeVideoMaxFrameDuration = duration
+            self.frontCamera?.activeVideoMinFrameDuration = duration
+            self.frontCamera?.activeVideoMaxFrameDuration = duration
             let durationSec =  Float(CMTimeGetSeconds(duration))
             print("Duration set to "+String(format: "%.2f", durationSec))
         }
