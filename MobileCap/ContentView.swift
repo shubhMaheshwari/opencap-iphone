@@ -279,7 +279,7 @@ final class CameraViewController: UIViewController {
 
         let localURL = URL(fileURLWithPath: "file.txt")
         try? "Some string".write(to: localURL, atomically: true, encoding: .utf8)
-        
+                
         timer = Timer.scheduledTimer(withTimeInterval: 1,
                                       repeats: true,
                                       block: { [weak self] timer in
@@ -287,7 +287,8 @@ final class CameraViewController: UIViewController {
                                                                                 
          let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
              guard let data = data else { return }
-             // print(String(data: data, encoding: .utf8)!)
+            //print(String(data: data, encoding: .utf8)!)
+            //print(String(self!.cameraController.sessionStatusUrl))
             
             let json = try? JSONSerialization.jsonObject(with: data, options: [])
             
@@ -317,6 +318,11 @@ final class CameraViewController: UIViewController {
                     }
                     self?.previousStatus = status
                 }
+                if let newSession = dictionary["newSessionURL"] as? String {
+                    self?.cameraController.sessionStatusUrl = newSession + "?device_id=" + UIDevice.current.identifierForVendor!.uuidString
+                    print("Switched session to" + String(self!.cameraController.sessionStatusUrl))
+                }
+                
             }
             // if no "status" continue
             // if data["status"] == "recording" then start recording
