@@ -1,0 +1,6 @@
+*.scuserstate
+*.scsettings
+*.xcbkptlist
+*.plist
+.DS_Store
+xcuserdata/
