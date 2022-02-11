@@ -16,8 +16,8 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
     var previewLayer: AVCaptureVideoPreviewLayer?
     var metadataOutput: AVCaptureMetadataOutput?
     var videoOutput: AVCaptureMovieFileOutput?
-    var apiUrl = "https://api.mobilecap.kidzinski.com"
-    var sessionStatusUrl = "https://api.mobilecap.kidzinski.com"
+    var apiUrl = "https://api.opencap.ai"
+    var sessionStatusUrl = "https://api.opencap.ai"
     var trialLink: String?
     var videoLink: String?
     var lensPosition = Float(0.8)
