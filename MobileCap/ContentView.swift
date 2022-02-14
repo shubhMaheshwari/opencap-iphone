@@ -47,9 +47,9 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             for format in device.formats {
                 for range in format.videoSupportedFrameRateRanges {
                     print(format)
-                    if CMVideoFormatDescriptionGetDimensions(format.formatDescription).width != 3840 {
-                        continue
-                    }
+//                    if CMVideoFormatDescriptionGetDimensions(format.formatDescription).width != 3840 {
+//                        continue
+//                    }
                     if range.maxFrameRate > bestFrameRateRange?.maxFrameRate ?? 0 {
                         bestFormat = format
                         bestFrameRateRange = range
