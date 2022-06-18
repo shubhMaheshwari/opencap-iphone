@@ -15,7 +15,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		1FA1DCCF2585CE14002AC3BA /* MobileCap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MobileCap.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1FA1DCCF2585CE14002AC3BA /* OpenCap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OpenCap.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1FA1DCD22585CE14002AC3BA /* MobileCapApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileCapApp.swift; sourceTree = "<group>"; };
 		1FA1DCD42585CE14002AC3BA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		1FA1DCD62585CE15002AC3BA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -48,7 +48,7 @@
 		1FA1DCD02585CE14002AC3BA /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1FA1DCCF2585CE14002AC3BA /* MobileCap.app */,
+				1FA1DCCF2585CE14002AC3BA /* OpenCap.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -84,9 +84,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		1FA1DCCE2585CE14002AC3BA /* MobileCap */ = {
+		1FA1DCCE2585CE14002AC3BA /* OpenCap */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1FA1DCDE2585CE15002AC3BA /* Build configuration list for PBXNativeTarget "MobileCap" */;
+			buildConfigurationList = 1FA1DCDE2585CE15002AC3BA /* Build configuration list for PBXNativeTarget "OpenCap" */;
 			buildPhases = (
 				1FA1DCCB2585CE14002AC3BA /* Sources */,
 				1FA1DCCC2585CE14002AC3BA /* Frameworks */,
@@ -96,12 +96,12 @@
 			);
 			dependencies = (
 			);
-			name = MobileCap;
+			name = OpenCap;
 			packageProductDependencies = (
 				1F90AF0A258D20B400F9404A /* Alamofire */,
 			);
 			productName = MobileCap;
-			productReference = 1FA1DCCF2585CE14002AC3BA /* MobileCap.app */;
+			productReference = 1FA1DCCF2585CE14002AC3BA /* OpenCap.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -118,7 +118,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 1FA1DCCA2585CE14002AC3BA /* Build configuration list for PBXProject "MobileCap" */;
+			buildConfigurationList = 1FA1DCCA2585CE14002AC3BA /* Build configuration list for PBXProject "OpenCap" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -134,7 +134,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				1FA1DCCE2585CE14002AC3BA /* MobileCap */,
+				1FA1DCCE2585CE14002AC3BA /* OpenCap */,
 			);
 		};
 /* End PBXProject section */
@@ -215,13 +215,14 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -270,12 +271,13 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -287,9 +289,9 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"MobileCap/Preview Content\"";
-				DEVELOPMENT_TEAM = 7PCKACBRGN;
+				DEVELOPMENT_TEAM = C785C9X8KV;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = MobileCap/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
@@ -297,8 +299,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.3.2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.stanfordnmbl.MobileCap;
+				MARKETING_VERSION = 1.5;
+				PRODUCT_BUNDLE_IDENTIFIER = com.stanfordnmbl.OpenCap;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
@@ -313,9 +315,9 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"MobileCap/Preview Content\"";
-				DEVELOPMENT_TEAM = 7PCKACBRGN;
+				DEVELOPMENT_TEAM = C785C9X8KV;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = MobileCap/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
@@ -323,8 +325,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.3.2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.stanfordnmbl.MobileCap;
+				MARKETING_VERSION = 1.5;
+				PRODUCT_BUNDLE_IDENTIFIER = com.stanfordnmbl.OpenCap;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
@@ -335,7 +337,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1FA1DCCA2585CE14002AC3BA /* Build configuration list for PBXProject "MobileCap" */ = {
+		1FA1DCCA2585CE14002AC3BA /* Build configuration list for PBXProject "OpenCap" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1FA1DCDC2585CE15002AC3BA /* Debug */,
@@ -344,7 +346,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1FA1DCDE2585CE15002AC3BA /* Build configuration list for PBXNativeTarget "MobileCap" */ = {
+		1FA1DCDE2585CE15002AC3BA /* Build configuration list for PBXNativeTarget "OpenCap" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1FA1DCDF2585CE15002AC3BA /* Debug */,

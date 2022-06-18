@@ -170,11 +170,12 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
 //            completion(nil, CameraControllerError.captureSessionIsMissing)
             return
         }
-        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+//        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
         
         let trialString = trialLink!.replacingOccurrences(of: "/", with: "")
-        let videoUrl = paths[0].appendingPathComponent(trialString + UIDevice.current.identifierForVendor!.uuidString + ".mov")
-        try? FileManager.default.removeItem(at: videoUrl)
+//        let videoUrl = paths[0].appendingPathComponent(trialString + UIDevice.current.identifierForVendor!.uuidString + ".mov")
+//        try? FileManager.default.removeItem(at: videoUrl)
+        let videoUrl = NSURL.fileURL(withPathComponents: [ NSTemporaryDirectory(), "recording.mov"])
         let connection = videoOutput!.connection(with: .video)!
         // enable the flag
         if #available(iOS 11.0, *), connection.isCameraIntrinsicMatrixDeliverySupported {
@@ -184,8 +185,8 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             connection.preferredVideoStabilizationMode = AVCaptureVideoStabilizationMode.off;
         }
         
-        videoOutput!.startRecording(to: videoUrl, recordingDelegate: self)
-        print("RECORDING STARTED: " + videoUrl.absoluteString)
+        videoOutput!.startRecording(to: videoUrl!, recordingDelegate: self)
+        print("RECORDING STARTED: " + videoUrl!.absoluteString)
 //        self.videoRecordCompletionBlock = completion
     }
     func stopRecording() {
@@ -234,7 +235,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
                         multipartFormData.append(file!, withName: "video" , fileName: "recording.mov", mimeType: "video/mp4")
                         multipartFormData.append(parameters, withName: "parameters")
                 },
-                    to: videoURL!, method: .patch , headers: headers)
+                    to: videoURL!, method: .patch , headers: headers, requestModifier: { $0.timeoutInterval = 180.0})
                     .response { response in
                         if let data = response.data{
                             print(data)
