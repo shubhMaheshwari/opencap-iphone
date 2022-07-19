@@ -29,6 +29,10 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             guard let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject else { return }
             guard let stringValue = readableObject.stringValue else { return }
             AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
+            var url = URL(string: stringValue)
+            var domain = url?.host
+            self.apiUrl = "https://" + domain! + "/"
+            print(domain)
             self.sessionStatusUrl = stringValue + "?device_id=" + UIDevice.current.identifierForVendor!.uuidString
             print(self.sessionStatusUrl)
         }
