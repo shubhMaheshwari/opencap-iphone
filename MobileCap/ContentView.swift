@@ -31,7 +31,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
             var url = URL(string: stringValue)
             var domain = url?.host
-            self.apiUrl = "https://" + domain! + "/"
+            self.apiUrl = "https://" + domain!
             print(domain)
             self.sessionStatusUrl = stringValue + "?device_id=" + UIDevice.current.identifierForVendor!.uuidString
             print(self.sessionStatusUrl)
@@ -255,7 +255,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
         guard let captureSession = self.captureSession, captureSession.isRunning else { throw CameraControllerError.captureSessionIsMissing }
             
         self.previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-            self.previewLayer?.videoGravity = AVLayerVideoGravity.resizeAspectFill
+        self.previewLayer?.videoGravity = AVLayerVideoGravity.resizeAspect
         self.previewLayer?.connection?.videoOrientation = .portrait
         
         view.layer.insertSublayer(self.previewLayer!, at: 0)
