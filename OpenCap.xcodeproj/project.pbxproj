@@ -12,6 +12,13 @@
 		1FA1DCD52585CE14002AC3BA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FA1DCD42585CE14002AC3BA /* ContentView.swift */; };
 		1FA1DCD72585CE15002AC3BA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1FA1DCD62585CE15002AC3BA /* Assets.xcassets */; };
 		1FA1DCDA2585CE15002AC3BA /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1FA1DCD92585CE15002AC3BA /* Preview Assets.xcassets */; };
+		246D082228C2465A003EC7B0 /* InstructionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 246D082128C2465A003EC7B0 /* InstructionView.swift */; };
+		246D082528C247A6003EC7B0 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 246D082428C247A6003EC7B0 /* Colors.swift */; };
+		246D082928C2517D003EC7B0 /* UXQRMiddleSquareView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 246D082728C2517D003EC7B0 /* UXQRMiddleSquareView.xib */; };
+		246D082A28C2517D003EC7B0 /* UXQRMiddleSquareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 246D082828C2517D003EC7B0 /* UXQRMiddleSquareView.swift */; };
+		24CA679928C693BC003F3159 /* CameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24CA679828C693BC003F3159 /* CameraController.swift */; };
+		24CA679B28C6944E003F3159 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24CA679A28C6944E003F3159 /* CameraViewController.swift */; };
+		24CA679D28C695F3003F3159 /* UIView+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24CA679C28C695F3003F3159 /* UIView+Extensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +29,13 @@
 		1FA1DCD92585CE15002AC3BA /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		1FA1DCDB2585CE15002AC3BA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1FA1DCE42585D749002AC3BA /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		246D082128C2465A003EC7B0 /* InstructionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstructionView.swift; sourceTree = "<group>"; };
+		246D082428C247A6003EC7B0 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
+		246D082728C2517D003EC7B0 /* UXQRMiddleSquareView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UXQRMiddleSquareView.xib; sourceTree = "<group>"; };
+		246D082828C2517D003EC7B0 /* UXQRMiddleSquareView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UXQRMiddleSquareView.swift; sourceTree = "<group>"; };
+		24CA679828C693BC003F3159 /* CameraController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraController.swift; sourceTree = "<group>"; };
+		24CA679A28C6944E003F3159 /* CameraViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
+		24CA679C28C695F3003F3159 /* UIView+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Extensions.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,9 +72,14 @@
 			children = (
 				1FA1DCD22585CE14002AC3BA /* MobileCapApp.swift */,
 				1FA1DCD42585CE14002AC3BA /* ContentView.swift */,
+				24CA679828C693BC003F3159 /* CameraController.swift */,
+				24CA679A28C6944E003F3159 /* CameraViewController.swift */,
+				246D082428C247A6003EC7B0 /* Colors.swift */,
+				246D082328C2465F003EC7B0 /* View */,
+				24CA679E28C69604003F3159 /* Extension */,
+				1FA1DCD82585CE15002AC3BA /* Preview Content */,
 				1FA1DCD62585CE15002AC3BA /* Assets.xcassets */,
 				1FA1DCDB2585CE15002AC3BA /* Info.plist */,
-				1FA1DCD82585CE15002AC3BA /* Preview Content */,
 			);
 			path = MobileCap;
 			sourceTree = "<group>";
@@ -79,6 +98,32 @@
 				1FA1DCE42585D749002AC3BA /* AVFoundation.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		246D082328C2465F003EC7B0 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				246D082628C2517D003EC7B0 /* UXQRMiddleSquareView */,
+				246D082128C2465A003EC7B0 /* InstructionView.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		246D082628C2517D003EC7B0 /* UXQRMiddleSquareView */ = {
+			isa = PBXGroup;
+			children = (
+				246D082728C2517D003EC7B0 /* UXQRMiddleSquareView.xib */,
+				246D082828C2517D003EC7B0 /* UXQRMiddleSquareView.swift */,
+			);
+			path = UXQRMiddleSquareView;
+			sourceTree = "<group>";
+		};
+		24CA679E28C69604003F3159 /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+				24CA679C28C695F3003F3159 /* UIView+Extensions.swift */,
+			);
+			path = Extension;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -144,6 +189,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				246D082928C2517D003EC7B0 /* UXQRMiddleSquareView.xib in Resources */,
 				1FA1DCDA2585CE15002AC3BA /* Preview Assets.xcassets in Resources */,
 				1FA1DCD72585CE15002AC3BA /* Assets.xcassets in Resources */,
 			);
@@ -156,8 +202,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				24CA679928C693BC003F3159 /* CameraController.swift in Sources */,
 				1FA1DCD52585CE14002AC3BA /* ContentView.swift in Sources */,
+				246D082528C247A6003EC7B0 /* Colors.swift in Sources */,
+				246D082A28C2517D003EC7B0 /* UXQRMiddleSquareView.swift in Sources */,
+				24CA679B28C6944E003F3159 /* CameraViewController.swift in Sources */,
 				1FA1DCD32585CE14002AC3BA /* MobileCapApp.swift in Sources */,
+				24CA679D28C695F3003F3159 /* UIView+Extensions.swift in Sources */,
+				246D082228C2465A003EC7B0 /* InstructionView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -287,9 +339,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"MobileCap/Preview Content\"";
 				DEVELOPMENT_TEAM = C785C9X8KV;
 				ENABLE_PREVIEWS = YES;
@@ -302,7 +354,7 @@
 				MARKETING_VERSION = 1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.stanfordnmbl.OpenCap;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = Nik;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -313,9 +365,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"MobileCap/Preview Content\"";
 				DEVELOPMENT_TEAM = C785C9X8KV;
 				ENABLE_PREVIEWS = YES;
@@ -328,7 +380,7 @@
 				MARKETING_VERSION = 1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.stanfordnmbl.OpenCap;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = Nik;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
