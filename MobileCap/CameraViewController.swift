@@ -8,6 +8,8 @@
 import UIKit
 import Alamofire
 import SwiftUI
+import SwiftMessages
+import Reachability
 
 final class CameraViewController: UIViewController {
     weak var timer: Timer?
@@ -17,9 +19,15 @@ final class CameraViewController: UIViewController {
     var previousStatus = "ready"
     var squareView: UXQRMiddleSquareView?
     var instructionView: InstructionView?
+    let reachability = try! Reachability()
+    var connectionErrorView: MessageView?
+    
+    deinit {
+        reachability.stopNotifier()
+        NotificationCenter.default.removeObserver(self, name: .reachabilityChanged, object: reachability)
+    }
     
     override func viewDidLoad() {
-        
         cameraController.delegate = self
         UIApplication.shared.isIdleTimerDisabled = true
 
@@ -92,7 +100,59 @@ final class CameraViewController: UIViewController {
         
         addInstructionView()
         addSquareView()
-        //cameraController.recordVideo()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        setupNetworkObserver()
+    }
+    
+    func setupNetworkObserver() {
+        NotificationCenter.default.addObserver(self, selector: #selector(reachabilityChanged(note:)), name: .reachabilityChanged, object: reachability)
+          do{
+            try reachability.startNotifier()
+          }catch{
+            print("could not start reachability notifier")
+          }
+    }
+    
+    @objc func reachabilityChanged(note: Notification) {
+
+      let reachability = note.object as! Reachability
+
+      switch reachability.connection {
+      case .wifi:
+          print("Reachable via WiFi")
+          self.dismissNoInternetConnectionError()
+      case .cellular:
+          print("Reachable via Cellular")
+          self.dismissNoInternetConnectionError()
+      case .unavailable:
+          self.presentNoInternetConnectionError()
+        print("Network not reachable")
+      }
+    }
+    
+    func presentNoInternetConnectionError() {
+        connectionErrorView = MessageView.viewFromNib(layout: .cardView)
+        guard let connectionErrorView = connectionErrorView else {
+            return
+        }
+
+        connectionErrorView.configureTheme(.error)
+        connectionErrorView.button?.isHidden = true
+        connectionErrorView.configureDropShadow()
+        connectionErrorView.configureContent(title: "", body: "Device no longer connected to server, verify your internet connection")
+        connectionErrorView.layoutMarginAdditions = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
+        (connectionErrorView.backgroundView as? CornerRoundingView)?.cornerRadius = 10
+        var config = SwiftMessages.defaultConfig
+        config.duration = .forever
+        config.interactiveHide = false
+        SwiftMessages.show(config: config, view: connectionErrorView)
+    }
+    
+    func dismissNoInternetConnectionError() {
+        SwiftMessages.hide()
     }
     
     func addSquareView() {
