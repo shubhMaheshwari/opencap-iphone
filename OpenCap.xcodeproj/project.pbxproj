@@ -12,6 +12,7 @@
 		1FA1DCD52585CE14002AC3BA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FA1DCD42585CE14002AC3BA /* ContentView.swift */; };
 		1FA1DCD72585CE15002AC3BA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1FA1DCD62585CE15002AC3BA /* Assets.xcassets */; };
 		1FA1DCDA2585CE15002AC3BA /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1FA1DCD92585CE15002AC3BA /* Preview Assets.xcassets */; };
+		2460EB3528C8B403004A975E /* Reachability in Frameworks */ = {isa = PBXBuildFile; productRef = 2460EB3428C8B403004A975E /* Reachability */; };
 		246D082228C2465A003EC7B0 /* InstructionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 246D082128C2465A003EC7B0 /* InstructionView.swift */; };
 		246D082528C247A6003EC7B0 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 246D082428C247A6003EC7B0 /* Colors.swift */; };
 		246D082928C2517D003EC7B0 /* UXQRMiddleSquareView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 246D082728C2517D003EC7B0 /* UXQRMiddleSquareView.xib */; };
@@ -19,6 +20,7 @@
 		24CA679928C693BC003F3159 /* CameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24CA679828C693BC003F3159 /* CameraController.swift */; };
 		24CA679B28C6944E003F3159 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24CA679A28C6944E003F3159 /* CameraViewController.swift */; };
 		24CA679D28C695F3003F3159 /* UIView+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24CA679C28C695F3003F3159 /* UIView+Extensions.swift */; };
+		24CA67A128C69EE5003F3159 /* SwiftMessages in Frameworks */ = {isa = PBXBuildFile; productRef = 24CA67A028C69EE5003F3159 /* SwiftMessages */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,6 +45,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				24CA67A128C69EE5003F3159 /* SwiftMessages in Frameworks */,
+				2460EB3528C8B403004A975E /* Reachability in Frameworks */,
 				1F90AF0B258D20B400F9404A /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -144,6 +148,8 @@
 			name = OpenCap;
 			packageProductDependencies = (
 				1F90AF0A258D20B400F9404A /* Alamofire */,
+				24CA67A028C69EE5003F3159 /* SwiftMessages */,
+				2460EB3428C8B403004A975E /* Reachability */,
 			);
 			productName = MobileCap;
 			productReference = 1FA1DCCF2585CE14002AC3BA /* OpenCap.app */;
@@ -174,6 +180,8 @@
 			mainGroup = 1FA1DCC62585CE14002AC3BA;
 			packageReferences = (
 				1F90AF06258D1D7100F9404A /* XCRemoteSwiftPackageReference "Alamofire" */,
+				24CA679F28C69EE5003F3159 /* XCRemoteSwiftPackageReference "SwiftMessages" */,
+				2460EB3328C8B403004A975E /* XCRemoteSwiftPackageReference "Reachability" */,
 			);
 			productRefGroup = 1FA1DCD02585CE14002AC3BA /* Products */;
 			projectDirPath = "";
@@ -341,7 +349,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "\"MobileCap/Preview Content\"";
 				DEVELOPMENT_TEAM = C785C9X8KV;
 				ENABLE_PREVIEWS = YES;
@@ -367,7 +375,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "\"MobileCap/Preview Content\"";
 				DEVELOPMENT_TEAM = C785C9X8KV;
 				ENABLE_PREVIEWS = YES;
@@ -418,6 +426,22 @@
 				minimumVersion = 5.4.0;
 			};
 		};
+		2460EB3328C8B403004A975E /* XCRemoteSwiftPackageReference "Reachability" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ashleymills/Reachability.swift";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+		24CA679F28C69EE5003F3159 /* XCRemoteSwiftPackageReference "SwiftMessages" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SwiftKickMobile/SwiftMessages.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -425,6 +449,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 1F90AF06258D1D7100F9404A /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
+		};
+		2460EB3428C8B403004A975E /* Reachability */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2460EB3328C8B403004A975E /* XCRemoteSwiftPackageReference "Reachability" */;
+			productName = Reachability;
+		};
+		24CA67A028C69EE5003F3159 /* SwiftMessages */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 24CA679F28C69EE5003F3159 /* XCRemoteSwiftPackageReference "SwiftMessages" */;
+			productName = SwiftMessages;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
