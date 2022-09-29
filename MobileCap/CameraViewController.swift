@@ -19,6 +19,7 @@ final class CameraViewController: UIViewController {
     var previousStatus = "ready"
     var squareView: UXQRMiddleSquareView?
     var instructionView: InstructionView?
+    var bottomActivityView: BottomActivityView?
     let reachability = try! Reachability()
     var connectionErrorView: MessageView?
     
@@ -90,15 +91,9 @@ final class CameraViewController: UIViewController {
         previewView.contentMode = UIView.ContentMode.scaleAspectFit
         view.addSubview(previewView)
         
-        cameraController.prepare {(error) in
-            if let error = error {
-                print(error)
-            }
-            
-            try? self.cameraController.displayPreview(on: self.previewView)
-        }
-        
+        prepareCamera()
         addInstructionView()
+        addBottomActivityView()
         addSquareView()
     }
     
@@ -114,6 +109,16 @@ final class CameraViewController: UIViewController {
           }catch{
             print("could not start reachability notifier")
           }
+    }
+    
+    func prepareCamera() {
+        cameraController.prepare {(error) in
+            if let error = error {
+                print(error)
+            }
+            
+            try? self.cameraController.displayPreview(on: self.previewView)
+        }
     }
     
     @objc func reachabilityChanged(note: Notification) {
@@ -185,16 +190,15 @@ final class CameraViewController: UIViewController {
     func updateInstructionViewText() {
         instructionView?.titleLabel?.text = InstructionTextType.mountDevice.rawValue
     }
-}
-
-extension CameraViewController : UIViewControllerRepresentable {
-    public typealias UIViewControllerType = CameraViewController
     
-    public func makeUIViewController(context: UIViewControllerRepresentableContext<CameraViewController>) -> CameraViewController {
-        return CameraViewController()
-    }
-    
-    public func updateUIViewController(_ uiViewController: CameraViewController, context: UIViewControllerRepresentableContext<CameraViewController>) {
+    func addBottomActivityView() {
+        bottomActivityView = BottomActivityView(frame: CGRect(x: 0, y: UIScreen.main.bounds.size.height-100, width: UIScreen.main.bounds.size.width, height: 100))
+        bottomActivityView?.delegate = self
+        
+        guard let bottomActivityView = bottomActivityView else {
+            return
+        }
+        self.view.addSubview(bottomActivityView)
     }
 }
 
@@ -205,4 +209,32 @@ extension CameraViewController: CameraControllerDelegate {
         removeInstructionView()
     }
 }
+
+extension CameraViewController: BottomActivityViewDelegate {
+    func didTapActionButton() {
+        let alert = UIAlertController(title: "", message: "Please select an option", preferredStyle: UIDevice.current.userInterfaceIdiom == .pad ? .alert : .actionSheet)
+           
+           alert.addAction(UIAlertAction(title: "Start a new session", style: .default , handler:{ (UIAlertAction)in
+               print("User click Start a new session")
+               DispatchQueue.main.async {
+                   self.cameraController.sessionStatusUrl = "https://api.opencap.ai"
+                   self.cameraController.setAutoFocus()
+                   self.timer?.invalidate()
+                   
+                   let viewController = CameraViewController()
+                   viewController.modalPresentationStyle = .fullScreen
+                   self.present(viewController, animated: true)
+               }
+           }))
+        
+           alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler:{ (UIAlertAction)in
+               print("User click Dismiss button")
+           }))
+        
+           self.present(alert, animated: true, completion: {
+               print("completion block")
+           })
+    }
+}
+
 
