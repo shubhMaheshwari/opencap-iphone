@@ -211,9 +211,28 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
         print("RECORDING STARTED: " + videoUrl!.absoluteString)
 //        self.videoRecordCompletionBlock = completion
     }
+    
     func stopRecording() {
         self.videoOutput?.stopRecording()
     }
+    
+    func restartCamera() {
+        if let metadataOutput = metadataOutput {
+            captureSession?.addOutput(metadataOutput)
+        }
+    }
+    
+    func setAutoFocus() {
+        do {
+            try self.frontCamera?.lockForConfiguration()
+        }
+        catch {
+            return
+        }
+        frontCamera?.focusMode = .continuousAutoFocus
+        self.frontCamera?.unlockForConfiguration()
+    }
+    
     func captureOutput(_ captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, from connection: AVCaptureConnection!){
         let connection = videoOutput!.connection(with: .video)!
         if #available(iOS 11.0, *), connection.isCameraIntrinsicMatrixDeliverySupported {

@@ -38,11 +38,6 @@
 	<string>${PRODUCT_NAME} stores videos for motion recognition.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>${PRODUCT_NAME} loads videos for motion recognition.</string>
-	<key>UIApplicationSceneManifest</key>
-	<dict>
-		<key>UIApplicationSupportsMultipleScenes</key>
-		<true/>
-	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIFileSharingEnabled</key>
