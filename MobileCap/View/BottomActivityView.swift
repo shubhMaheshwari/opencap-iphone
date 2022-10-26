@@ -13,8 +13,8 @@ protocol BottomActivityViewDelegate: AnyObject {
 
 class BottomActivityView: UIView {
 
-    private var actionsButton: UIButton?
-    private var logoImageView: UIImageView?
+     var actionsButton: UIButton?
+     var logoImageView: UIImageView?
     
     weak var delegate: BottomActivityViewDelegate?
     
@@ -46,5 +46,4 @@ class BottomActivityView: UIView {
     @objc func tapAction() {
         delegate?.didTapActionButton()
     }
-
 }

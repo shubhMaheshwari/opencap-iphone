@@ -139,6 +139,14 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             else { throw CameraControllerError.noCamerasAvailable }
             
             captureSession.startRunning()
+            var captureInput : AVCaptureDeviceInput?{
+                get{
+                    return self.captureSession?.inputs.first as? AVCaptureDeviceInput
+                }
+            }
+            let dims : CMVideoDimensions = CMVideoFormatDescriptionGetDimensions(captureInput!.device.activeFormat.formatDescription)
+            print(dims)
+            
         }
            
         DispatchQueue(label: "prepare").async {
@@ -198,6 +206,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
 //        let videoUrl = paths[0].appendingPathComponent(trialString + UIDevice.current.identifierForVendor!.uuidString + ".mov")
 //        try? FileManager.default.removeItem(at: videoUrl)
         let videoUrl = NSURL.fileURL(withPathComponents: [ NSTemporaryDirectory(), "recording.mov"])
+        
         let connection = videoOutput!.connection(with: .video)!
         // enable the flag
         if #available(iOS 11.0, *), connection.isCameraIntrinsicMatrixDeliverySupported {
@@ -206,6 +215,32 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
         if (connection.isVideoStabilizationSupported) {
             connection.preferredVideoStabilizationMode = AVCaptureVideoStabilizationMode.off;
         }
+
+        var rotateValue = ""
+        let newOrientation: AVCaptureVideoOrientation
+        switch Device.currentDeviceOrientation {
+        case .portrait:
+            newOrientation = .portrait //2
+            rotateValue = "90"
+        case .portraitUpsideDown:
+            newOrientation = .portraitUpsideDown //1
+            rotateValue = "270"
+        case .landscapeLeft:
+            newOrientation = .landscapeRight //4
+            rotateValue = "0"
+        case .landscapeRight:
+            newOrientation = .landscapeLeft //3
+            rotateValue = "180"
+        default :
+            newOrientation = .portrait
+            rotateValue = "90"
+        }
+        connection.videoOrientation = newOrientation
+
+        let descriptionItem = AVMutableMetadataItem()
+        descriptionItem.identifier = .quickTimeMetadataVideoOrientation
+        descriptionItem.value = rotateValue as (NSCopying & NSObjectProtocol)?
+        videoOutput!.metadata = [descriptionItem]
         
         videoOutput!.startRecording(to: videoUrl!, recordingDelegate: self)
         print("RECORDING STARTED: " + videoUrl!.absoluteString)
@@ -292,10 +327,11 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
         guard let captureSession = self.captureSession, captureSession.isRunning else { throw CameraControllerError.captureSessionIsMissing }
             
         self.previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+        self.previewLayer?.backgroundColor = appBlue.cgColor
         self.previewLayer?.videoGravity = AVLayerVideoGravity.resizeAspect
         self.previewLayer?.connection?.videoOrientation = .portrait
-        
         view.layer.insertSublayer(self.previewLayer!, at: 0)
         self.previewLayer?.frame = view.frame
     }
+
 }

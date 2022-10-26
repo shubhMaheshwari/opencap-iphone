@@ -10,6 +10,7 @@
 		1F90AF0B258D20B400F9404A /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 1F90AF0A258D20B400F9404A /* Alamofire */; };
 		1FA1DCD72585CE15002AC3BA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1FA1DCD62585CE15002AC3BA /* Assets.xcassets */; };
 		1FA1DCDA2585CE15002AC3BA /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1FA1DCD92585CE15002AC3BA /* Preview Assets.xcassets */; };
+		241A02A828FED4CA00360CD5 /* Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = 241A02A728FED4CA00360CD5 /* Device.swift */; };
 		242A48CD28D356C2009ECC20 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 242A48CC28D356C2009ECC20 /* AppDelegate.swift */; };
 		242A48D128D35B46009ECC20 /* BottomActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 242A48D028D35B46009ECC20 /* BottomActivityView.swift */; };
 		2460EB3528C8B403004A975E /* Reachability in Frameworks */ = {isa = PBXBuildFile; productRef = 2460EB3428C8B403004A975E /* Reachability */; };
@@ -29,6 +30,7 @@
 		1FA1DCD92585CE15002AC3BA /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		1FA1DCDB2585CE15002AC3BA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1FA1DCE42585D749002AC3BA /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		241A02A728FED4CA00360CD5 /* Device.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Device.swift; sourceTree = "<group>"; };
 		242A48CC28D356C2009ECC20 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		242A48D028D35B46009ECC20 /* BottomActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomActivityView.swift; sourceTree = "<group>"; };
 		246D082128C2465A003EC7B0 /* InstructionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstructionView.swift; sourceTree = "<group>"; };
@@ -126,6 +128,7 @@
 			isa = PBXGroup;
 			children = (
 				24CA679C28C695F3003F3159 /* UIView+Extensions.swift */,
+				241A02A728FED4CA00360CD5 /* Device.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -213,6 +216,7 @@
 				242A48D128D35B46009ECC20 /* BottomActivityView.swift in Sources */,
 				24CA679928C693BC003F3159 /* CameraController.swift in Sources */,
 				246D082528C247A6003EC7B0 /* Colors.swift in Sources */,
+				241A02A828FED4CA00360CD5 /* Device.swift in Sources */,
 				242A48CD28D356C2009ECC20 /* AppDelegate.swift in Sources */,
 				246D082A28C2517D003EC7B0 /* UXQRMiddleSquareView.swift in Sources */,
 				24CA679B28C6944E003F3159 /* CameraViewController.swift in Sources */,
@@ -350,7 +354,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_ASSET_PATHS = "\"MobileCap/Preview Content\"";
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = C785C9X8KV;
@@ -379,7 +383,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_ASSET_PATHS = "\"MobileCap/Preview Content\"";
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = C785C9X8KV;
