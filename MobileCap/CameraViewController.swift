@@ -10,6 +10,7 @@ import Alamofire
 import SwiftUI
 import SwiftMessages
 import Reachability
+import AVFoundation
 
 final class CameraViewController: UIViewController {
     weak var timer: Timer?
@@ -22,7 +23,10 @@ final class CameraViewController: UIViewController {
     var bottomActivityView: BottomActivityView?
     let reachability = try! Reachability()
     var connectionErrorView: MessageView?
-    
+    var currentInstructionType: InstructionTextType = .scan
+    var isScannedQR = false
+    var shouldPresentInstructionView = true
+
     deinit {
         reachability.stopNotifier()
         NotificationCenter.default.removeObserver(self, name: .reachabilityChanged, object: reachability)
@@ -90,11 +94,76 @@ final class CameraViewController: UIViewController {
         previewView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.height))
         previewView.contentMode = UIView.ContentMode.scaleAspectFit
         view.addSubview(previewView)
-        
+        UIView.setAnimationsEnabled(false)
+
         prepareCamera()
-        addInstructionView()
+        addInstructionView(for: .portrait)
         addBottomActivityView()
         addSquareView()
+        NotificationCenter.default.addObserver(self, selector: #selector(rotated), name: UIDevice.orientationDidChangeNotification, object: nil)
+        
+        
+    }
+    
+    @objc func rotated() {
+        Device.currentDeviceOrientation = UIDevice.current.orientation
+        switch UIDevice.current.orientation {
+        case .portrait:
+            print("portrait")
+            if shouldPresentInstructionView {
+                self.instructionView?.removeFromSuperview()
+                addInstructionView(for: .portrait)
+                updateInstructionViewText()
+                removeInstructionView()
+            }
+
+            removeBottomActivityView()
+            addBottomActivityView()
+        case .portraitUpsideDown:
+            print("portraitUpsideDown")
+
+            if shouldPresentInstructionView {
+                self.instructionView?.removeFromSuperview()
+                addInstructionView(for: .portraitUpsideDown)
+                updateInstructionViewText()
+                removeInstructionView()
+            }
+            
+            removeBottomActivityView()
+            addBottomActivityView()
+            bottomActivityView?.logoImageView?.rotate(angle: 180)
+            bottomActivityView?.actionsButton?.rotate(angle: 180)
+        case .landscapeLeft:
+            print("landscapeLeft")
+            if shouldPresentInstructionView {
+                self.instructionView?.removeFromSuperview()
+                addInstructionView(for: .landscapeLeft)
+                updateInstructionViewText()
+                removeInstructionView()
+            }
+            
+            removeBottomActivityView()
+            addBottomActivityView()
+            bottomActivityView?.logoImageView?.rotate(angle: 90)
+            bottomActivityView?.actionsButton?.rotate(angle: 90)
+
+        case .landscapeRight:
+            print("landscapeRight")
+            if shouldPresentInstructionView {
+                self.instructionView?.removeFromSuperview()
+                addInstructionView(for: .landscapeRight)
+                updateInstructionViewText()
+                removeInstructionView()
+            }
+            
+            removeBottomActivityView()
+            addBottomActivityView()
+            bottomActivityView?.logoImageView?.rotate(angle: -90)
+            bottomActivityView?.actionsButton?.rotate(angle: -90)
+        default :
+            return
+        }
+
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -166,6 +235,8 @@ final class CameraViewController: UIViewController {
             return
         }
         squareView.center = self.view.center
+        squareView.autoresizingMask = [.flexibleTopMargin, .flexibleRightMargin, .flexibleLeftMargin, .flexibleBottomMargin]
+
         self.view.addSubview(squareView)
     }
     
@@ -173,8 +244,33 @@ final class CameraViewController: UIViewController {
         squareView?.removeFromSuperview()
     }
     
-    func addInstructionView() {
-        instructionView = InstructionView(frame: CGRect.init(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height / 5))
+    func addInstructionView(for orientation: UIDeviceOrientation) {
+        switch UIDevice.current.orientation {
+        case .portrait:
+            instructionView = InstructionView(frame: CGRect.init(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height / 5))
+        case .portraitUpsideDown:
+            print("portraitUpsideDown")
+            instructionView = InstructionView(frame: CGRect.init(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height / 5))
+        case .landscapeLeft:
+            print("landscapeLeft")
+            let div: CGFloat = Device.IS_IPHONE ? 6 : 6
+            instructionView = InstructionView(frame: CGRect.init(x: 200, y: self.view.frame.midY, width: self.view.frame.height, height: self.view.frame.height / div), label: true)
+            instructionView?.center = CGPoint(x: self.view.frame.maxX, y: self.view.frame.midY)
+            instructionView?.rotate(angle: 90)
+            instructionView?.addLabel()
+        case .landscapeRight:
+            let spacing: CGFloat = Device.IS_IPHONE ? 150 : 150
+            let div: CGFloat = Device.IS_IPHONE ? 6 : 6
+            instructionView = InstructionView(frame: CGRect.init(x: 200, y: self.view.frame.midY, width: self.view.frame.height, height: self.view.frame.height / div), label: true)
+            instructionView?.center = CGPoint(x: self.view.frame.minX, y: self.view.frame.midY)
+            instructionView?.rotate(angle: -90)
+            instructionView?.addLabel()
+            print("landscapeRight")
+        default :
+            instructionView = InstructionView(frame: CGRect.init(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height / 5))
+        }
+        instructionView!.autoresizingMask = [.flexibleHeight, .flexibleWidth, .flexibleTopMargin, .flexibleRightMargin, .flexibleLeftMargin, .flexibleBottomMargin]
+
         guard let instructionView = instructionView else {
             return
         }
@@ -184,15 +280,17 @@ final class CameraViewController: UIViewController {
     func removeInstructionView() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 30.0) {
             self.instructionView?.removeFromSuperview()
+            self.shouldPresentInstructionView = false
         }
     }
     
     func updateInstructionViewText() {
-        instructionView?.titleLabel?.text = InstructionTextType.mountDevice.rawValue
+        instructionView?.titleLabel?.text = currentInstructionType.rawValue
     }
     
     func addBottomActivityView() {
         bottomActivityView = BottomActivityView(frame: CGRect(x: 0, y: UIScreen.main.bounds.size.height-100, width: UIScreen.main.bounds.size.width, height: 100))
+
         bottomActivityView?.delegate = self
         
         guard let bottomActivityView = bottomActivityView else {
@@ -200,10 +298,15 @@ final class CameraViewController: UIViewController {
         }
         self.view.addSubview(bottomActivityView)
     }
+    
+    func removeBottomActivityView() {
+        bottomActivityView?.removeFromSuperview()
+    }
 }
 
 extension CameraViewController: CameraControllerDelegate {
     func didScanQRCode() {
+        currentInstructionType = .mountDevice
         updateInstructionViewText()
         removeSquareView()
         removeInstructionView()
@@ -236,5 +339,38 @@ extension CameraViewController: BottomActivityViewDelegate {
            })
     }
 }
+
+extension CameraViewController {
+
+
+    func updateVideoOrientation(orientaion: AVCaptureVideoOrientation) {
+        guard let videoPreviewLayer = self.cameraController.previewLayer else {
+                return
+            }
+            guard videoPreviewLayer.connection!.isVideoOrientationSupported else {
+                print("isVideoOrientationSupported is false")
+                return
+            }
+            let statusBarOrientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation
+            let videoOrientation: AVCaptureVideoOrientation = orientaion//statusBarOrientation?.videoOrientation ?? .portrait
+            videoPreviewLayer.frame = view.layer.frame
+            videoPreviewLayer.connection?.videoOrientation = videoOrientation
+            videoPreviewLayer.removeAllAnimations()
+        }
+
+    
+
+        override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+            super.viewWillTransition(to: size, with: coordinator)
+
+//            coordinator.animate(alongsideTransition: nil, completion: { [weak self] (context) in
+//                DispatchQueue.main.async(execute: {
+//                    self.updateVideoOrientation()
+//                })
+//            })
+        }
+    
+}
+
 
 

@@ -22,3 +22,18 @@ extension UIView {
     }
 }
 
+extension UIView {
+
+    /**
+       Rotate a view by specified degrees
+       parameter angle: angle in degrees
+     */
+
+    func rotate(angle: CGFloat) {
+        let radians = angle / 180.0 * CGFloat.pi
+        let rotation = CGAffineTransformRotate(self.transform, radians);
+        self.transform = rotation
+    }
+
+}
+
