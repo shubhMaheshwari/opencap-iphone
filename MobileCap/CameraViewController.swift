@@ -201,10 +201,10 @@ final class CameraViewController: UIViewController {
       switch reachability.connection {
       case .wifi:
           print("Reachable via WiFi")
-          self.dismissMessageView()
+          self.dismissSwiftMessage(with: .noInternetConnection)
       case .cellular:
           print("Reachable via Cellular")
-          self.dismissMessageView()
+          self.dismissSwiftMessage(with: .noInternetConnection)
       case .unavailable:
           self.presentNoInternetConnectionError()
         print("Network not reachable")
@@ -213,6 +213,7 @@ final class CameraViewController: UIViewController {
     
     func presentNoInternetConnectionError() {
         connectionErrorView = MessageView.viewFromNib(layout: .cardView)
+        connectionErrorView?.id = AlertMessagesIds.noInternetConnection.rawValue
         guard let connectionErrorView = connectionErrorView else {
             return
         }
@@ -226,31 +227,30 @@ final class CameraViewController: UIViewController {
         var config = SwiftMessages.defaultConfig
         config.duration = .forever
         config.interactiveHide = false
-        dismissMessageView()
         SwiftMessages.show(config: config, view: connectionErrorView)
     }
     
-    func presentPortraitLockedWarning() {
+    func presentPortraitLockWarningMessage() {
         portraitLockWarningView = MessageView.viewFromNib(layout: .cardView)
+        portraitLockWarningView?.id = AlertMessagesIds.portraitLockWarning.rawValue
         guard let portraitLockWarningView = portraitLockWarningView else {
             return
         }
-
+        
         portraitLockWarningView.configureTheme(.warning)
         portraitLockWarningView.button?.isHidden = true
         portraitLockWarningView.configureDropShadow()
-        portraitLockWarningView.configureContent(title: "Warning", body: "Turn off portrait orientation lock on your device to record a video with the phone rotated.")
+        portraitLockWarningView.configureContent(title: "", body: "Warning: turn off Portrait Orientation Lock on your device to record a video with the phone rotated.")
         portraitLockWarningView.layoutMarginAdditions = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
         (portraitLockWarningView.backgroundView as? CornerRoundingView)?.cornerRadius = 10
         var config = SwiftMessages.defaultConfig
         config.duration = .forever
         config.interactiveHide = false
-        dismissMessageView()
         SwiftMessages.show(config: config, view: portraitLockWarningView)
     }
     
-    func dismissMessageView() {
-        SwiftMessages.hide()
+    func dismissSwiftMessage(with id: AlertMessagesIds) {
+         SwiftMessages.hide(id: id.rawValue)
     }
     
     func addSquareView() {
@@ -427,18 +427,12 @@ extension CameraViewController {
     }
     
     func deviceOrientationChanged(orinetation: UIInterfaceOrientation) {
-        let interfaceOrientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? UIInterfaceOrientation.unknown
-
-        print("orinetation :",orinetation.rawValue)
-        print("orinetation device :",UIDevice.current.orientation.rawValue)
-
         if orinetation.isLandscape && UIDevice.current.orientation.isPortrait {
-            presentPortraitLockedWarning()
+            presentPortraitLockWarningMessage()
         } else {
-            dismissMessageView()
+            dismissSwiftMessage(with: .portraitLockWarning)
         }
      }
-
     
 }
 
