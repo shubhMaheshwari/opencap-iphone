@@ -18,6 +18,7 @@
 		246D082528C247A6003EC7B0 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 246D082428C247A6003EC7B0 /* Colors.swift */; };
 		246D082928C2517D003EC7B0 /* UXQRMiddleSquareView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 246D082728C2517D003EC7B0 /* UXQRMiddleSquareView.xib */; };
 		246D082A28C2517D003EC7B0 /* UXQRMiddleSquareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 246D082828C2517D003EC7B0 /* UXQRMiddleSquareView.swift */; };
+		247E3558291EA030004B7265 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 247E3557291EA030004B7265 /* Constants.swift */; };
 		24CA679928C693BC003F3159 /* CameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24CA679828C693BC003F3159 /* CameraController.swift */; };
 		24CA679B28C6944E003F3159 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24CA679A28C6944E003F3159 /* CameraViewController.swift */; };
 		24CA679D28C695F3003F3159 /* UIView+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24CA679C28C695F3003F3159 /* UIView+Extensions.swift */; };
@@ -37,6 +38,7 @@
 		246D082428C247A6003EC7B0 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		246D082728C2517D003EC7B0 /* UXQRMiddleSquareView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UXQRMiddleSquareView.xib; sourceTree = "<group>"; };
 		246D082828C2517D003EC7B0 /* UXQRMiddleSquareView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UXQRMiddleSquareView.swift; sourceTree = "<group>"; };
+		247E3557291EA030004B7265 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		24CA679828C693BC003F3159 /* CameraController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraController.swift; sourceTree = "<group>"; };
 		24CA679A28C6944E003F3159 /* CameraViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
 		24CA679C28C695F3003F3159 /* UIView+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Extensions.swift"; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 			children = (
 				24CA679C28C695F3003F3159 /* UIView+Extensions.swift */,
 				241A02A728FED4CA00360CD5 /* Device.swift */,
+				247E3557291EA030004B7265 /* Constants.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -216,6 +219,7 @@
 				242A48D128D35B46009ECC20 /* BottomActivityView.swift in Sources */,
 				24CA679928C693BC003F3159 /* CameraController.swift in Sources */,
 				246D082528C247A6003EC7B0 /* Colors.swift in Sources */,
+				247E3558291EA030004B7265 /* Constants.swift in Sources */,
 				241A02A828FED4CA00360CD5 /* Device.swift in Sources */,
 				242A48CD28D356C2009ECC20 /* AppDelegate.swift in Sources */,
 				246D082A28C2517D003EC7B0 /* UXQRMiddleSquareView.swift in Sources */,

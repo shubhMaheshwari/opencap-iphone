@@ -11,6 +11,7 @@ import SwiftUI
 import SwiftMessages
 import Reachability
 import AVFoundation
+import CoreMotion
 
 final class CameraViewController: UIViewController {
     weak var timer: Timer?
@@ -23,9 +24,11 @@ final class CameraViewController: UIViewController {
     var bottomActivityView: BottomActivityView?
     let reachability = try! Reachability()
     var connectionErrorView: MessageView?
+    var portraitWarningView: MessageView?
     var currentInstructionType: InstructionTextType = .scan
     var isScannedQR = false
     var shouldPresentInstructionView = true
+    var motionManager: CMMotionManager!
 
     deinit {
         reachability.stopNotifier()
@@ -168,6 +171,7 @@ final class CameraViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         setupNetworkObserver()
+        addCoreMotion()
     }
     
     func setupNetworkObserver() {
@@ -196,10 +200,10 @@ final class CameraViewController: UIViewController {
       switch reachability.connection {
       case .wifi:
           print("Reachable via WiFi")
-          self.dismissNoInternetConnectionError()
+          self.dismissSwiftMessage(with: .noInternetConnection)
       case .cellular:
           print("Reachable via Cellular")
-          self.dismissNoInternetConnectionError()
+          self.dismissSwiftMessage(with: .noInternetConnection)
       case .unavailable:
           self.presentNoInternetConnectionError()
         print("Network not reachable")
@@ -208,6 +212,7 @@ final class CameraViewController: UIViewController {
     
     func presentNoInternetConnectionError() {
         connectionErrorView = MessageView.viewFromNib(layout: .cardView)
+        portraitWarningView?.id = AlertMessagesIds.noInternetConnection.rawValue
         guard let connectionErrorView = connectionErrorView else {
             return
         }
@@ -224,8 +229,27 @@ final class CameraViewController: UIViewController {
         SwiftMessages.show(config: config, view: connectionErrorView)
     }
     
-    func dismissNoInternetConnectionError() {
-        SwiftMessages.hide()
+    func presentPortraitLockWarningMessage() {
+        portraitWarningView = MessageView.viewFromNib(layout: .cardView)
+        portraitWarningView?.id = AlertMessagesIds.portraitLockWarning.rawValue
+        guard let portraitWarningView = portraitWarningView else {
+            return
+        }
+
+        portraitWarningView.configureTheme(.warning)
+        portraitWarningView.button?.isHidden = true
+        portraitWarningView.configureDropShadow()
+        portraitWarningView.configureContent(title: "", body: "Warning: turn off Portrait Orientation Lock on your device to record a video with the phone rotated.")
+        portraitWarningView.layoutMarginAdditions = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
+        (portraitWarningView.backgroundView as? CornerRoundingView)?.cornerRadius = 10
+        var config = SwiftMessages.defaultConfig
+        config.duration = .forever
+        config.interactiveHide = false
+        SwiftMessages.show(config: config, view: portraitWarningView)
+    }
+    
+    func dismissSwiftMessage(with id: AlertMessagesIds) {
+        SwiftMessages.hide(id: id.rawValue)
     }
     
     func addSquareView() {
@@ -360,20 +384,61 @@ extension CameraViewController {
             videoPreviewLayer.connection?.videoOrientation = videoOrientation
             videoPreviewLayer.removeAllAnimations()
         }
-
     
-
         override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
             super.viewWillTransition(to: size, with: coordinator)
-
-//            coordinator.animate(alongsideTransition: nil, completion: { [weak self] (context) in
-//                DispatchQueue.main.async(execute: {
-//                    self.updateVideoOrientation()
-//                })
-//            })
         }
-    
 }
 
+extension CameraViewController {
+    func addCoreMotion() {
 
+        let splitAngle:Double = 0.75
+        let updateTimer:TimeInterval = 2.0
 
+        motionManager = CMMotionManager()
+        motionManager?.gyroUpdateInterval = updateTimer
+        motionManager?.accelerometerUpdateInterval = updateTimer
+
+        var orientationLast = UIInterfaceOrientation(rawValue: 0)!
+
+        motionManager?.startAccelerometerUpdates(to: (OperationQueue.current)!, withHandler: {
+            (acceleroMeterData, error) -> Void in
+            if error == nil {
+
+                let acceleration = (acceleroMeterData?.acceleration)!
+                var orientationNew = UIInterfaceOrientation(rawValue: 0)!
+
+                if acceleration.x >= splitAngle {
+                    orientationNew = .landscapeLeft
+                }
+                else if acceleration.x <= -(splitAngle) {
+                    orientationNew = .landscapeRight
+                }
+                else if acceleration.y <= -(splitAngle) {
+                    orientationNew = .portrait
+                }
+                else if acceleration.y >= splitAngle {
+                    orientationNew = .portraitUpsideDown
+                }
+
+                if orientationNew != orientationLast && orientationNew != .unknown{
+                    orientationLast = orientationNew
+                    self.deviceOrientationChanged(orinetation: orientationNew)
+                }
+            }
+            else {
+                print("error : \(error!)")
+            }
+        })
+    }
+    
+    func deviceOrientationChanged(orinetation: UIInterfaceOrientation) {
+        print("orinetation : \(orinetation.rawValue.description) == current \(UIDevice.current.orientation.rawValue.description)")
+        if orinetation != .portrait && UIDevice.current.orientation == .portrait {
+            presentPortraitLockWarningMessage()
+        } else {
+            dismissSwiftMessage(with: .portraitLockWarning)
+        }
+    }
+}
