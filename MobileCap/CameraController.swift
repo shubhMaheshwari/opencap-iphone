@@ -44,8 +44,8 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             guard let stringValue = readableObject.stringValue else { return }
             AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
             print("String = \(stringValue)")
-            var url = URL(string: stringValue)
-            var domain = url?.host
+            let url = URL(string: stringValue)
+            let domain = url?.host
             self.apiUrl = "https://" + domain!
             print(domain)
             self.sessionStatusUrl = stringValue + "?device_id=" + UIDevice.current.identifierForVendor!.uuidString
@@ -137,7 +137,6 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
                 }
             }
             else { throw CameraControllerError.noCamerasAvailable }
-            
             captureSession.startRunning()
             var captureInput : AVCaptureDeviceInput?{
                 get{
@@ -197,17 +196,13 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
 
         
         guard let captureSession = self.captureSession, captureSession.isRunning else {
-//            completion(nil, CameraControllerError.captureSessionIsMissing)
             return
         }
-//        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-        
-        let trialString = trialLink!.replacingOccurrences(of: "/", with: "")
-//        let videoUrl = paths[0].appendingPathComponent(trialString + UIDevice.current.identifierForVendor!.uuidString + ".mov")
-//        try? FileManager.default.removeItem(at: videoUrl)
+
         let videoUrl = NSURL.fileURL(withPathComponents: [ NSTemporaryDirectory(), "recording.mov"])
         
         let connection = videoOutput!.connection(with: .video)!
+       
         // enable the flag
         if #available(iOS 11.0, *), connection.isCameraIntrinsicMatrixDeliverySupported {
             connection.isCameraIntrinsicMatrixDeliveryEnabled = true
@@ -253,7 +248,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
 
         for format in frontCamera.formats {
             print("Active formats are: \(format)")
-            var ranges = format.videoSupportedFrameRateRanges as [AVFrameRateRange]
+            let ranges = format.videoSupportedFrameRateRanges as [AVFrameRateRange]
             let frameRates = ranges[0]
             if frameRates.maxFrameRate > maxFrameRate {
                 maxFrameRate = frameRates.maxFrameRate
@@ -347,7 +342,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             
         self.previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         self.previewLayer?.backgroundColor = appBlue.cgColor
-        self.previewLayer?.videoGravity = AVLayerVideoGravity.resizeAspect
+        self.previewLayer?.videoGravity = Device.IS_IPHONE ? .resizeAspect : .resizeAspectFill
         self.previewLayer?.connection?.videoOrientation = .portrait
         view.layer.insertSublayer(self.previewLayer!, at: 0)
         self.previewLayer?.frame = view.frame

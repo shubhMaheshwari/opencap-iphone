@@ -91,7 +91,11 @@ final class CameraViewController: UIViewController {
          task.resume()
         })
 
-        previewView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.height))
+        view.backgroundColor = appBlue
+//        previewView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.height))
+
+        previewView = Device.IS_IPHONE ? UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.height)) :
+                                       UIView(frame: CGRect(x: 0, y: 40, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.height - 160))
         previewView.contentMode = UIView.ContentMode.scaleAspectFit
         view.addSubview(previewView)
         UIView.setAnimationsEnabled(false)
@@ -113,7 +117,7 @@ final class CameraViewController: UIViewController {
             if shouldPresentInstructionView {
                 self.instructionView?.removeFromSuperview()
                 addInstructionView(for: .portrait)
-                updateInstructionViewText()
+                updateInstructionViewText(for: .portrait)
                 removeInstructionView()
             }
 
@@ -121,14 +125,12 @@ final class CameraViewController: UIViewController {
             addBottomActivityView()
         case .portraitUpsideDown:
             print("portraitUpsideDown")
-
             if shouldPresentInstructionView {
                 self.instructionView?.removeFromSuperview()
                 addInstructionView(for: .portraitUpsideDown)
-                updateInstructionViewText()
+                updateInstructionViewText(for: .portraitUpsideDown)
                 removeInstructionView()
             }
-            
             removeBottomActivityView()
             addBottomActivityView()
             bottomActivityView?.logoImageView?.rotate(angle: 180)
@@ -138,24 +140,21 @@ final class CameraViewController: UIViewController {
             if shouldPresentInstructionView {
                 self.instructionView?.removeFromSuperview()
                 addInstructionView(for: .landscapeLeft)
-                updateInstructionViewText()
+                updateInstructionViewText(for: .landscapeLeft)
                 removeInstructionView()
             }
-            
             removeBottomActivityView()
             addBottomActivityView()
             bottomActivityView?.logoImageView?.rotate(angle: 90)
             bottomActivityView?.actionsButton?.rotate(angle: 90)
-
         case .landscapeRight:
             print("landscapeRight")
             if shouldPresentInstructionView {
                 self.instructionView?.removeFromSuperview()
                 addInstructionView(for: .landscapeRight)
-                updateInstructionViewText()
+                updateInstructionViewText(for: .landscapeRight)
                 removeInstructionView()
             }
-            
             removeBottomActivityView()
             addBottomActivityView()
             bottomActivityView?.logoImageView?.rotate(angle: -90)
@@ -247,22 +246,21 @@ final class CameraViewController: UIViewController {
     func addInstructionView(for orientation: UIDeviceOrientation) {
         switch UIDevice.current.orientation {
         case .portrait:
-            instructionView = InstructionView(frame: CGRect.init(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height / 5))
+            instructionView = InstructionView(frame: CGRect.init(x: self.view.frame.width * 0.1, y: 84, width: self.view.frame.width * 0.8, height: self.view.frame.height / 5))
         case .portraitUpsideDown:
             print("portraitUpsideDown")
             instructionView = InstructionView(frame: CGRect.init(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height / 5))
         case .landscapeLeft:
             print("landscapeLeft")
             let div: CGFloat = Device.IS_IPHONE ? 6 : 6
-            instructionView = InstructionView(frame: CGRect.init(x: 200, y: self.view.frame.midY, width: self.view.frame.height, height: self.view.frame.height / div), label: true)
-            instructionView?.center = CGPoint(x: self.view.frame.maxX, y: self.view.frame.midY)
+            instructionView = InstructionView(frame: CGRect.init(x: 200, y: self.view.frame.midY, width: self.view.frame.height * 0.7, height: self.view.frame.height*0.5 / div), label: true)
+            instructionView?.center = CGPoint(x: self.view.frame.maxX-50, y: self.view.frame.midY)
             instructionView?.rotate(angle: 90)
             instructionView?.addLabel()
         case .landscapeRight:
-            let spacing: CGFloat = Device.IS_IPHONE ? 150 : 150
             let div: CGFloat = Device.IS_IPHONE ? 6 : 6
-            instructionView = InstructionView(frame: CGRect.init(x: 200, y: self.view.frame.midY, width: self.view.frame.height, height: self.view.frame.height / div), label: true)
-            instructionView?.center = CGPoint(x: self.view.frame.minX, y: self.view.frame.midY)
+            instructionView = InstructionView(frame: CGRect.init(x: 200, y: self.view.frame.midY, width: self.view.frame.height * 0.7, height: self.view.frame.height*0.5 / div), label: true)
+            instructionView?.center = CGPoint(x: self.view.frame.minX+50, y: self.view.frame.midY)
             instructionView?.rotate(angle: -90)
             instructionView?.addLabel()
             print("landscapeRight")
@@ -278,14 +276,19 @@ final class CameraViewController: UIViewController {
     }
     
     func removeInstructionView() {
+        guard currentInstructionType != .scan  else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 30.0) {
             self.instructionView?.removeFromSuperview()
             self.shouldPresentInstructionView = false
         }
     }
     
-    func updateInstructionViewText() {
-        instructionView?.titleLabel?.text = currentInstructionType.rawValue
+    func updateInstructionViewText(for orientation: UIDeviceOrientation? = nil) {
+        if currentInstructionType == .scan {
+            instructionView?.titleLabel?.text = orientation == .landscapeLeft || orientation == .landscapeRight ? InstructionTextType.scanFullText.rawValue : InstructionTextType.scan.rawValue
+        } else {
+            instructionView?.titleLabel?.text = currentInstructionType.rawValue
+        }
     }
     
     func addBottomActivityView() {
