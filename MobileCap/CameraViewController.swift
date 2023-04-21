@@ -57,6 +57,10 @@ final class CameraViewController: UIViewController {
             let json = try? JSONSerialization.jsonObject(with: data, options: [])
             
             if let dictionary = json as? [String: Any] {
+                
+                if let video = dictionary["url"] as? String {
+                    self!.cameraController.videoUrlNew = video
+                }
                 if let video = dictionary["video"] as? String {
                     self!.cameraController.videoLink = video
                 }
@@ -110,8 +114,6 @@ final class CameraViewController: UIViewController {
         addBottomActivityView()
         addSquareView()
         NotificationCenter.default.addObserver(self, selector: #selector(rotated), name: UIDevice.orientationDidChangeNotification, object: nil)
-        
-        
     }
     
     @objc func rotated() {

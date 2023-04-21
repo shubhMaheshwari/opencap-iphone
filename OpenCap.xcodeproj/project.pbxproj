@@ -19,6 +19,7 @@
 		246D082928C2517D003EC7B0 /* UXQRMiddleSquareView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 246D082728C2517D003EC7B0 /* UXQRMiddleSquareView.xib */; };
 		246D082A28C2517D003EC7B0 /* UXQRMiddleSquareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 246D082828C2517D003EC7B0 /* UXQRMiddleSquareView.swift */; };
 		247E3558291EA030004B7265 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 247E3557291EA030004B7265 /* Constants.swift */; };
+		2496183A29ED7E63003D5FF5 /* VideoCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2496183929ED7E63003D5FF5 /* VideoCredentials.swift */; };
 		24CA679928C693BC003F3159 /* CameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24CA679828C693BC003F3159 /* CameraController.swift */; };
 		24CA679B28C6944E003F3159 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24CA679A28C6944E003F3159 /* CameraViewController.swift */; };
 		24CA679D28C695F3003F3159 /* UIView+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24CA679C28C695F3003F3159 /* UIView+Extensions.swift */; };
@@ -39,6 +40,7 @@
 		246D082728C2517D003EC7B0 /* UXQRMiddleSquareView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UXQRMiddleSquareView.xib; sourceTree = "<group>"; };
 		246D082828C2517D003EC7B0 /* UXQRMiddleSquareView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UXQRMiddleSquareView.swift; sourceTree = "<group>"; };
 		247E3557291EA030004B7265 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		2496183929ED7E63003D5FF5 /* VideoCredentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCredentials.swift; sourceTree = "<group>"; };
 		24CA679828C693BC003F3159 /* CameraController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraController.swift; sourceTree = "<group>"; };
 		24CA679A28C6944E003F3159 /* CameraViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
 		24CA679C28C695F3003F3159 /* UIView+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Extensions.swift"; sourceTree = "<group>"; };
@@ -82,6 +84,7 @@
 				24CA679828C693BC003F3159 /* CameraController.swift */,
 				24CA679A28C6944E003F3159 /* CameraViewController.swift */,
 				246D082428C247A6003EC7B0 /* Colors.swift */,
+				2496183B29ED7E8B003D5FF5 /* Model */,
 				246D082328C2465F003EC7B0 /* View */,
 				24CA679E28C69604003F3159 /* Extension */,
 				1FA1DCD82585CE15002AC3BA /* Preview Content */,
@@ -124,6 +127,14 @@
 				246D082828C2517D003EC7B0 /* UXQRMiddleSquareView.swift */,
 			);
 			path = UXQRMiddleSquareView;
+			sourceTree = "<group>";
+		};
+		2496183B29ED7E8B003D5FF5 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				2496183929ED7E63003D5FF5 /* VideoCredentials.swift */,
+			);
+			path = Model;
 			sourceTree = "<group>";
 		};
 		24CA679E28C69604003F3159 /* Extension */ = {
@@ -219,6 +230,7 @@
 				242A48D128D35B46009ECC20 /* BottomActivityView.swift in Sources */,
 				24CA679928C693BC003F3159 /* CameraController.swift in Sources */,
 				246D082528C247A6003EC7B0 /* Colors.swift in Sources */,
+				2496183A29ED7E63003D5FF5 /* VideoCredentials.swift in Sources */,
 				247E3558291EA030004B7265 /* Constants.swift in Sources */,
 				241A02A828FED4CA00360CD5 /* Device.swift in Sources */,
 				242A48CD28D356C2009ECC20 /* AppDelegate.swift in Sources */,
@@ -356,10 +368,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 21;
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 22;
 				DEVELOPMENT_ASSET_PATHS = "\"MobileCap/Preview Content\"";
-				DEVELOPMENT_TEAM = WFQLYW8HYX;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = MobileCap/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
@@ -384,7 +396,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 21;
+				CURRENT_PROJECT_VERSION = 22;
 				DEVELOPMENT_ASSET_PATHS = "\"MobileCap/Preview Content\"";
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = C785C9X8KV;

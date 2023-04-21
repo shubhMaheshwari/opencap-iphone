@@ -29,10 +29,15 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
     var previewLayer: AVCaptureVideoPreviewLayer?
     var metadataOutput: AVCaptureMetadataOutput?
     var videoOutput: AVCaptureMovieFileOutput?
-    var apiUrl = "https://api.opencap.ai"
-    var sessionStatusUrl = "https://api.opencap.ai"
+    var apiUrl = "https://dev.opencap.ai"
+    var sessionStatusUrl = "https://dev.opencap.ai"
+    var presignedUrl = ""
+    var videoCredentials: VideoCredentials?
     var trialLink: String?
     var videoLink: String?
+    
+    var videoUrlNew: String?
+
     var lensPosition = Float(0.8)
     var bestFormat: AVCaptureDevice.Format?
     weak var delegate: CameraControllerDelegate?
@@ -47,9 +52,10 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             let url = URL(string: stringValue)
             let domain = url?.host
             self.apiUrl = "https://" + domain!
-            print(domain)
             self.sessionStatusUrl = stringValue + "?device_id=" + UIDevice.current.identifierForVendor!.uuidString
+            self.presignedUrl = stringValue.replacingOccurrences(of: "/status", with: "") + "get_presigned_url/"
             print(self.sessionStatusUrl)
+            fetchVideoCredentials()
             delegate?.didScanQRCode()
         }
     }
@@ -295,18 +301,13 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             print("seconds = %f", CMTimeGetSeconds(frontCamera.activeVideoMaxFrameDuration))
             print("Sending: " + outputFileURL.absoluteString)
             let file = try? Data(contentsOf: outputFileURL)
-                
-            let headers: HTTPHeaders = [
-                "Content-type": "multipart/form-data"
-            ]
-
+            
             let videoURL = URL(string: self.apiUrl + self.videoLink!)
-
+            
             if (file != nil){
                 print("Updating video: " + videoURL!.absoluteString)
                 let sfov = String(self.frontCamera!.activeFormat.videoFieldOfView.description)
                 
-                // Get the model as per https://www.zerotoappstore.com/how-to-get-iphone-device-model-swift.html
                 var systemInfo = utsname()
                 uname(&systemInfo)
                 let modelCode = withUnsafePointer(to: &systemInfo.machine) {
@@ -316,22 +317,29 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
                 }
                 let modelCodeStr = String(modelCode!)
                 let maxFrameRate = getMaxFrameRate()
-                
-                let jsonparam = "{\"fov\":"+sfov+",\"model\":\""+modelCodeStr+"\",\"max_framerate\":\(maxFrameRate)}"
-                let parameters = Data(jsonparam.utf8)
-                
-                AF.upload(
-                    multipartFormData: { multipartFormData in
-                        multipartFormData.append(file!, withName: "video" , fileName: "recording.mov", mimeType: "video/mp4")
-                        multipartFormData.append(parameters, withName: "parameters")
-                },
-                    to: videoURL!, method: .patch , headers: headers, requestModifier: { $0.timeoutInterval = 180.0})
-                    .response { response in
-                        if let data = response.data{
-                            print(data)
+                guard let videoCredentials = videoCredentials else {
+                    return
+                }
+
+                uploadVideoToS3(file: file!, uploadCredentials: videoCredentials) { error in
+                    if error == nil {
+                        let params = ["video_url" : videoCredentials.key,
+                                      "parameters": [ "fov" : sfov,
+                                                     "model" : modelCodeStr,
+                                                     "max_framerate" : maxFrameRate]]
+
+                        AF.request(videoURL?.absoluteString ?? "", method: .patch, parameters: params, encoding: JSONEncoding.default)
+                            .responseJSON { response in
+                                switch response.result {
+                                case .success(let value):
+                                    print(value)
+                                case .failure(let error):
+                                    print(error)
+                             }
                         }
                     }
                 }
+            }
         } else {
             print("ERROR")
         }
@@ -347,5 +355,46 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
         view.layer.insertSublayer(self.previewLayer!, at: 0)
         self.previewLayer?.frame = view.frame
     }
+    
+    // MARK: - uploading to S3
+    
+    private func uploadVideoToS3(file: Data, uploadCredentials s3: VideoCredentials, completion: @escaping ((Error?) -> ())) {
+        let parameter = ["key": s3.key,
+                         "AWSAccessKeyId": s3.accessKeyId,
+                         "policy": s3.policy,
+                         "signature": s3.signature]
 
+        AF.upload(multipartFormData: { multipartFormData in
+                for (key, value) in parameter {
+                    multipartFormData.append(value.data(using: .utf8)!, withName: key)
+                }
+                multipartFormData.append(file, withName: "file", fileName: self.videoCredentials?.key ?? "", mimeType: "video/mp4")
+            },
+            to: s3.url, method: .post , headers: nil, requestModifier: { $0.timeoutInterval = 180.0})
+        .response { response in
+            if let error = response.error {
+                print("Error uploading video to S3: \(error.localizedDescription)")
+                completion(error)
+            } else {
+                print("Successfully uploaded video to S3 \(response)")
+                completion(nil)
+            }
+        }
+    }
+}
+
+extension CameraController {
+    func fetchVideoCredentials() {
+        if let url = URL(string: presignedUrl) {
+            URLSession.shared.dataTask(with: url) { data, response, error in
+                if let data = data {
+                    do {
+                        self.videoCredentials = try JSONDecoder().decode(VideoCredentials.self, from: data)
+                    } catch let error {
+                        print(error)
+                    }
+                }
+            }.resume()
+        }
+    }
 }
