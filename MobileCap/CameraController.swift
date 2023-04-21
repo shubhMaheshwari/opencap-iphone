@@ -44,8 +44,8 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             guard let stringValue = readableObject.stringValue else { return }
             AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
             print("String = \(stringValue)")
-            var url = URL(string: stringValue)
-            var domain = url?.host
+            let url = URL(string: stringValue)
+            let domain = url?.host
             self.apiUrl = "https://" + domain!
             print(domain)
             self.sessionStatusUrl = stringValue + "?device_id=" + UIDevice.current.identifierForVendor!.uuidString
@@ -137,7 +137,6 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
                 }
             }
             else { throw CameraControllerError.noCamerasAvailable }
-            
             captureSession.startRunning()
             var captureInput : AVCaptureDeviceInput?{
                 get{
@@ -184,7 +183,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
         if let bestFormat = self.bestFormat {
             self.frontCamera!.activeFormat = bestFormat
             // Set the device's min/max frame duration.
-            let duration = CMTimeMake(value:1,timescale:frameRate)
+            let duration = CMTimeMake(value: 1,timescale: frameRate)
             self.frontCamera?.activeVideoMinFrameDuration = duration
             self.frontCamera?.activeVideoMaxFrameDuration = duration
             let durationSec =  Float(CMTimeGetSeconds(duration))
@@ -197,17 +196,13 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
 
         
         guard let captureSession = self.captureSession, captureSession.isRunning else {
-//            completion(nil, CameraControllerError.captureSessionIsMissing)
             return
         }
-//        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-        
-        let trialString = trialLink!.replacingOccurrences(of: "/", with: "")
-//        let videoUrl = paths[0].appendingPathComponent(trialString + UIDevice.current.identifierForVendor!.uuidString + ".mov")
-//        try? FileManager.default.removeItem(at: videoUrl)
+
         let videoUrl = NSURL.fileURL(withPathComponents: [ NSTemporaryDirectory(), "recording.mov"])
         
         let connection = videoOutput!.connection(with: .video)!
+       
         // enable the flag
         if #available(iOS 11.0, *), connection.isCameraIntrinsicMatrixDeliverySupported {
             connection.isCameraIntrinsicMatrixDeliveryEnabled = true
@@ -247,6 +242,22 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
 //        self.videoRecordCompletionBlock = completion
     }
     
+    func getMaxFrameRate() -> Int {
+        guard let frontCamera = frontCamera else { return 0 }
+        var maxFrameRate: Double = 0
+
+        for format in frontCamera.formats {
+            print("Active formats are: \(format)")
+            let ranges = format.videoSupportedFrameRateRanges as [AVFrameRateRange]
+            let frameRates = ranges[0]
+            if frameRates.maxFrameRate > maxFrameRate {
+                maxFrameRate = frameRates.maxFrameRate
+            }
+        }
+        print("MaxFrameRate = \(maxFrameRate)")
+        return Int(maxFrameRate)
+    }
+    
     func stopRecording() {
         self.videoOutput?.stopRecording()
     }
@@ -278,9 +289,10 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
         }
     }
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
+        guard let frontCamera = frontCamera else { return }
         if error == nil {
             print("RECORDED")
-            print("seconds = %f", CMTimeGetSeconds(frontCamera!.activeVideoMaxFrameDuration))
+            print("seconds = %f", CMTimeGetSeconds(frontCamera.activeVideoMaxFrameDuration))
             print("Sending: " + outputFileURL.absoluteString)
             let file = try? Data(contentsOf: outputFileURL)
                 
@@ -303,7 +315,9 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
                     }
                 }
                 let modelCodeStr = String(modelCode!)
-                let jsonparam = "{\"fov\":"+sfov+",\"model\":\""+modelCodeStr+"\"}"
+                let maxFrameRate = getMaxFrameRate()
+                
+                let jsonparam = "{\"fov\":"+sfov+",\"model\":\""+modelCodeStr+"\",\"max_framerate\":\(maxFrameRate)}"
                 let parameters = Data(jsonparam.utf8)
                 
                 AF.upload(
@@ -328,7 +342,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             
         self.previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         self.previewLayer?.backgroundColor = appBlue.cgColor
-        self.previewLayer?.videoGravity = AVLayerVideoGravity.resizeAspect
+        self.previewLayer?.videoGravity = Device.IS_IPHONE ? .resizeAspect : .resizeAspectFill
         self.previewLayer?.connection?.videoOrientation = .portrait
         view.layer.insertSublayer(self.previewLayer!, at: 0)
         self.previewLayer?.frame = view.frame
