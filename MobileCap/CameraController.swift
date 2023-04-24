@@ -11,6 +11,7 @@ import Alamofire
 
 protocol CameraControllerDelegate: AnyObject {
     func didScanQRCode()
+    func didFailedUploadingToS3(with message: String?)
 }
 
 enum CameraControllerError: Swift.Error {
@@ -29,8 +30,8 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
     var previewLayer: AVCaptureVideoPreviewLayer?
     var metadataOutput: AVCaptureMetadataOutput?
     var videoOutput: AVCaptureMovieFileOutput?
-    var apiUrl = "https://dev.opencap.ai"
-    var sessionStatusUrl = "https://dev.opencap.ai"
+    var apiUrl = ""
+    var sessionStatusUrl = ""
     var presignedUrl = ""
     var videoCredentials: VideoCredentials?
     var trialLink: String?
@@ -371,9 +372,10 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
                 multipartFormData.append(file, withName: "file", fileName: self.videoCredentials?.key ?? "", mimeType: "video/mp4")
             },
             to: s3.url, method: .post , headers: nil, requestModifier: { $0.timeoutInterval = 180.0})
+        .validate()
         .response { response in
             if let error = response.error {
-                print("Error uploading video to S3: \(error.localizedDescription)")
+                self.delegate?.didFailedUploadingToS3(with: "Error uploading video to S3: \(error.localizedDescription)")
                 completion(error)
             } else {
                 print("Successfully uploaded video to S3 \(response)")
