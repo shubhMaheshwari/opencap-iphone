@@ -46,54 +46,59 @@ final class CameraViewController: UIViewController {
                 
         timer = Timer.scheduledTimer(withTimeInterval: 1,
                                       repeats: true,
-                                      block: { [weak self] timer in
-                                        let url = URL(string: self!.cameraController.sessionStatusUrl)!
-                                                                                
-         let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
-             guard let data = data else { return }
-            //print(String(data: data, encoding: .utf8)!)
-            //print(String(self!.cameraController.sessionStatusUrl))
+                                     block: { [weak self] timer in
+            guard let sesssionStatusUrl = self?.cameraController.sessionStatusUrl,
+                  let url = URL(string: sesssionStatusUrl) else { return }
             
-            let json = try? JSONSerialization.jsonObject(with: data, options: [])
-            
-            if let dictionary = json as? [String: Any] {
-                if let video = dictionary["video"] as? String {
-                    self!.cameraController.videoLink = video
-                }
-                if let lenspos = dictionary["lenspos"] as? Float {
-                    self!.cameraController.lensPosition = lenspos
-                }
-                if let trial = dictionary["trial"] as? String {
-                    self!.cameraController.trialLink = trial
-                }
-                if let status = dictionary["status"] as? String {
-                    print(status)
-                    if (self!.previousStatus != status && status == "recording")
-                    {
-                        var frameRate = Int32(60)
-                        if let desiredFrameRate = dictionary["framerate"] as? Int32 {
-                            frameRate = desiredFrameRate
-                        }
-                        self?.cameraController.recordVideo(frameRate: frameRate)
-                    }
-                    if (self!.previousStatus != status && status == "uploading")
-                    {
-                        self?.cameraController.stopRecording()
-                    }
-                    self?.previousStatus = status
-                }
-                if let newSession = dictionary["newSessionURL"] as? String {
-                    self?.cameraController.sessionStatusUrl = newSession + "?device_id=" + UIDevice.current.identifierForVendor!.uuidString
-                    print("Switched session to" + String(self!.cameraController.sessionStatusUrl))
-                }
+            let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
+                guard let data = data else { return }
+                //print(String(data: data, encoding: .utf8)!)
+                //print(String(self!.cameraController.sessionStatusUrl))
                 
+                let json = try? JSONSerialization.jsonObject(with: data, options: [])
+                
+                if let dictionary = json as? [String: Any] {
+                    
+                    if let video = dictionary["url"] as? String {
+                        self!.cameraController.videoUrlNew = video
+                    }
+                    if let video = dictionary["video"] as? String {
+                        self!.cameraController.videoLink = video
+                    }
+                    if let lenspos = dictionary["lenspos"] as? Float {
+                        self!.cameraController.lensPosition = lenspos
+                    }
+                    if let trial = dictionary["trial"] as? String {
+                        self!.cameraController.trialLink = trial
+                    }
+                    if let status = dictionary["status"] as? String {
+                        print(status)
+                        if (self!.previousStatus != status && status == "recording")
+                        {
+                            var frameRate = Int32(60)
+                            if let desiredFrameRate = dictionary["framerate"] as? Int32 {
+                                frameRate = desiredFrameRate
+                            }
+                            self?.cameraController.recordVideo(frameRate: frameRate)
+                        }
+                        if (self!.previousStatus != status && status == "uploading")
+                        {
+                            self?.cameraController.stopRecording()
+                        }
+                        self?.previousStatus = status
+                    }
+                    if let newSession = dictionary["newSessionURL"] as? String {
+                        self?.cameraController.sessionStatusUrl = newSession + "?device_id=" + UIDevice.current.identifierForVendor!.uuidString
+                        print("Switched session to" + String(self!.cameraController.sessionStatusUrl))
+                    }
+                    
+                }
+                // if no "status" continue
+                // if data["status"] == "recording" then start recording
+                // if data["status"] == "uploading" then stop recording and submit the video
             }
-            // if no "status" continue
-            // if data["status"] == "recording" then start recording
-            // if data["status"] == "uploading" then stop recording and submit the video
-         }
-
-         task.resume()
+            
+            task.resume()
         })
 
         view.backgroundColor = appBlue
@@ -110,8 +115,6 @@ final class CameraViewController: UIViewController {
         addBottomActivityView()
         addSquareView()
         NotificationCenter.default.addObserver(self, selector: #selector(rotated), name: UIDevice.orientationDidChangeNotification, object: nil)
-        
-        
     }
     
     @objc func rotated() {
@@ -339,6 +342,12 @@ extension CameraViewController: CameraControllerDelegate {
         removeSquareView()
         removeInstructionView()
     }
+    
+    func didFailedUploadingToS3(with message: String?) {
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
+        self.present(alert, animated: true, completion: nil)
+    }
 }
 
 extension CameraViewController: BottomActivityViewDelegate {
@@ -379,7 +388,7 @@ extension CameraViewController {
                 return
             }
             let statusBarOrientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation
-            let videoOrientation: AVCaptureVideoOrientation = orientaion//statusBarOrientation?.videoOrientation ?? .portrait
+            let videoOrientation: AVCaptureVideoOrientation = orientaion
             videoPreviewLayer.frame = view.layer.frame
             videoPreviewLayer.connection?.videoOrientation = videoOrientation
             videoPreviewLayer.removeAllAnimations()
