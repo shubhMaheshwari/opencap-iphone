@@ -11,7 +11,7 @@ import Alamofire
 
 protocol CameraControllerDelegate: AnyObject {
     func didScanQRCode()
-    func didFailedUploadingToS3(with message: String?)
+    func didFailedUploadingVideo(with message: String?)
 }
 
 enum CameraControllerError: Swift.Error {
@@ -33,7 +33,6 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
     var apiUrl = ""
     var sessionStatusUrl = ""
     var presignedUrl = ""
-    var videoCredentials: VideoCredentials?
     var trialLink: String?
     var videoLink: String?
     
@@ -56,7 +55,6 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             self.sessionStatusUrl = stringValue + "?device_id=" + UIDevice.current.identifierForVendor!.uuidString
             self.presignedUrl = stringValue.replacingOccurrences(of: "/status", with: "") + "get_presigned_url/"
             print(self.sessionStatusUrl)
-            fetchVideoCredentials()
             delegate?.didScanQRCode()
         }
     }
@@ -305,7 +303,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             
             let videoURL = URL(string: self.apiUrl + self.videoLink!)
             
-            if (file != nil){
+            if (file != nil) {
                 print("Updating video: " + videoURL!.absoluteString)
                 let sfov = String(self.frontCamera!.activeFormat.videoFieldOfView.description)
                 
@@ -318,25 +316,26 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
                 }
                 let modelCodeStr = String(modelCode!)
                 let maxFrameRate = getMaxFrameRate()
-                guard let videoCredentials = videoCredentials else {
-                    return
-                }
-
-                uploadVideoToS3(file: file!, uploadCredentials: videoCredentials) { error in
-                    if error == nil {
-                        let params = ["video_url" : videoCredentials.key,
-                                      "parameters": [ "fov" : sfov,
-                                                     "model" : modelCodeStr,
-                                                     "max_framerate" : maxFrameRate]]
-
-                        AF.request(videoURL?.absoluteString ?? "", method: .patch, parameters: params, encoding: JSONEncoding.default)
-                            .responseJSON { response in
-                                switch response.result {
-                                case .success(let value):
-                                    print(value)
-                                case .failure(let error):
-                                    print(error)
-                             }
+                fetchVideoCredentials { videoCredentials, error in
+                    guard let videoCredentials = videoCredentials else {
+                        return
+                    }
+                    self.uploadVideoToS3(file: file!, uploadCredentials: videoCredentials) { error in
+                        if error == nil {
+                            let params = ["video_url" : videoCredentials.key,
+                                          "parameters": [ "fov" : sfov,
+                                                          "model" : modelCodeStr,
+                                                          "max_framerate" : maxFrameRate]]
+                            
+                            AF.request(videoURL?.absoluteString ?? "", method: .patch, parameters: params, encoding: JSONEncoding.default)
+                                .responseJSON { response in
+                                    switch response.result {
+                                    case .success(let value):
+                                        print(value)
+                                    case .failure(let error):
+                                        print(error)
+                                    }
+                                }
                         }
                     }
                 }
@@ -369,13 +368,13 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
                 for (key, value) in parameter {
                     multipartFormData.append(value.data(using: .utf8)!, withName: key)
                 }
-                multipartFormData.append(file, withName: "file", fileName: self.videoCredentials?.key ?? "", mimeType: "video/mp4")
+                multipartFormData.append(file, withName: "file", fileName: s3.key, mimeType: "video/mp4")
             },
             to: s3.url, method: .post , headers: nil, requestModifier: { $0.timeoutInterval = 180.0})
         .validate()
         .response { response in
             if let error = response.error {
-                self.delegate?.didFailedUploadingToS3(with: "Error uploading video to S3: \(error.localizedDescription)")
+                self.delegate?.didFailedUploadingVideo(with: "Error uploading video to S3: \(error.localizedDescription)")
                 completion(error)
             } else {
                 print("Successfully uploaded video to S3 \(response)")
@@ -386,14 +385,17 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
 }
 
 extension CameraController {
-    func fetchVideoCredentials() {
+    func fetchVideoCredentials(completion: @escaping ((VideoCredentials?, Error?) -> ())) {
         if let url = URL(string: presignedUrl) {
             URLSession.shared.dataTask(with: url) { data, response, error in
                 if let data = data {
                     do {
-                        self.videoCredentials = try JSONDecoder().decode(VideoCredentials.self, from: data)
+                        let videoCredentials = try JSONDecoder().decode(VideoCredentials.self, from: data)
+                        completion(videoCredentials, nil)
                     } catch let error {
                         print(error)
+                        self.delegate?.didFailedUploadingVideo(with: "Error fetching presign URL: \(error.localizedDescription)")
+                        completion(nil, error)
                     }
                 }
             }.resume()
