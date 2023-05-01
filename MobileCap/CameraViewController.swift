@@ -343,7 +343,7 @@ extension CameraViewController: CameraControllerDelegate {
         removeInstructionView()
     }
     
-    func didFailedUploadingToS3(with message: String?) {
+    func didFailedUploadingVideo(with message: String?) {
         let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
         self.present(alert, animated: true, completion: nil)
