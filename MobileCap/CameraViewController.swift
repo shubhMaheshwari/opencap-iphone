@@ -25,6 +25,8 @@ final class CameraViewController: UIViewController {
     let reachability = try! Reachability()
     var connectionErrorView: MessageView?
     var portraitLockWarningView: MessageView?
+    var progressDownload: UIProgressView = UIProgressView(progressViewStyle: .default)
+    let uploadingVideoAlertController = UIAlertController(title: " ", message: " ", preferredStyle: .alert)
 
     var currentInstructionType: InstructionTextType = .scan
     var isScannedQR = false
@@ -34,6 +36,7 @@ final class CameraViewController: UIViewController {
     deinit {
         reachability.stopNotifier()
         NotificationCenter.default.removeObserver(self, name: .reachabilityChanged, object: reachability)
+        NotificationCenter.default.removeObserver(self, name: .AVCaptureSessionRuntimeError, object: self.cameraController.captureSession)
     }
     
     override func viewDidLoad() {
@@ -114,7 +117,37 @@ final class CameraViewController: UIViewController {
         addInstructionView(for: .portrait)
         addBottomActivityView()
         addSquareView()
-        NotificationCenter.default.addObserver(self, selector: #selector(rotated), name: UIDevice.orientationDidChangeNotification, object: nil)
+        NotificationCenter.default.addObserver(self,
+                                            selector: #selector(rotated),
+                                            name: UIDevice.orientationDidChangeNotification,
+                                            object: nil)
+        
+        // Add observer for AVCaptureSession runtime errors
+        NotificationCenter.default.addObserver(forName: .AVCaptureSessionRuntimeError, object: self.cameraController.captureSession, queue: nil) { notification in
+            // Handle the runtime error
+            if let error = notification.userInfo?[AVCaptureSessionErrorKey] as? AVError {
+                let errorMessage = "AVCaptureSession runtime error: \(error.localizedDescription)"
+                print(errorMessage)
+                self.presentErrorAlert(with: errorMessage)
+            }
+        }
+    }
+    
+    func presentUploadingAlert() {
+        DispatchQueue.main.async {
+            self.progressDownload.setProgress(0, animated: true)
+            self.progressDownload.frame = CGRect(x: 10, y: 70, width: 250, height: 0)
+            self.progressDownload.progressTintColor = appBlue
+            self.uploadingVideoAlertController.view.addSubview(self.progressDownload)
+            self.uploadingVideoAlertController.title = "Uploading video 0%"
+            self.uploadingVideoAlertController.view.subviews.first?.subviews.first?.subviews.first?.backgroundColor = UIColor.black
+            self.uploadingVideoAlertController.view.tintColor = UIColor.white
+            self.present(self.uploadingVideoAlertController, animated: true, completion: nil)
+        }
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
     }
     
     @objc func rotated() {
@@ -333,9 +366,33 @@ final class CameraViewController: UIViewController {
     func removeBottomActivityView() {
         bottomActivityView?.removeFromSuperview()
     }
+    
+    func presentErrorAlert(with message: String?) {
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
+        self.present(alert, animated: true, completion: nil)
+    }
 }
 
 extension CameraViewController: CameraControllerDelegate {
+    func uploadingVideoStarted() {
+        presentUploadingAlert()
+    }
+    
+    func updateUploadingProgress(progress: Double) {
+        DispatchQueue.main.async {
+            let progressString = String(format: "%.0f", progress * 100)
+            self.uploadingVideoAlertController.title = "Uploading video \(progressString)%"
+            self.progressDownload.setProgress(Float(progress), animated: true)
+        }
+    }
+    
+    func didFinishUploadingVideo() {
+        DispatchQueue.main.async {
+            self.uploadingVideoAlertController.dismiss(animated: true)
+        }
+    }
+    
     func didScanQRCode() {
         currentInstructionType = .mountDevice
         updateInstructionViewText()
@@ -344,9 +401,8 @@ extension CameraViewController: CameraControllerDelegate {
     }
     
     func didFailedUploadingVideo(with message: String?) {
-        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
-        self.present(alert, animated: true, completion: nil)
+        uploadingVideoAlertController.dismiss(animated: true)
+        presentErrorAlert(with: message)
     }
 }
 
@@ -387,7 +443,6 @@ extension CameraViewController {
                 print("isVideoOrientationSupported is false")
                 return
             }
-            let statusBarOrientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation
             let videoOrientation: AVCaptureVideoOrientation = orientaion
             videoPreviewLayer.frame = view.layer.frame
             videoPreviewLayer.connection?.videoOrientation = videoOrientation
@@ -442,7 +497,6 @@ extension CameraViewController {
             dismissSwiftMessage(with: .portraitLockWarning)
         }
      }
-    
 }
 
 
