@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseCore
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -17,6 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let cameraViewController = CameraViewController()
         self.window?.rootViewController = cameraViewController
         self.window?.makeKeyAndVisible()
+        FirebaseApp.configure()
         return true
     }
 

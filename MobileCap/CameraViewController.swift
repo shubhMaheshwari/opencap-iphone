@@ -129,8 +129,10 @@ final class CameraViewController: UIViewController {
                 let errorMessage = "AVCaptureSession runtime error: \(error.localizedDescription)"
                 print(errorMessage)
                 self.presentErrorAlert(with: errorMessage)
+                FirebaseErrorLogger.shared.logError(with: .captureSession, message: errorMessage)
             }
         }
+        
     }
     
     func presentUploadingAlert() {
