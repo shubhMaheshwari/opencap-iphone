@@ -12,6 +12,9 @@ import Alamofire
 protocol CameraControllerDelegate: AnyObject {
     func didScanQRCode()
     func didFailedUploadingVideo(with message: String?)
+    func uploadingVideoStarted()
+    func updateUploadingProgress(progress: Double)
+    func didFinishUploadingVideo()
 }
 
 enum CameraControllerError: Swift.Error {
@@ -72,9 +75,6 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             for format in device.formats {
                 for range in format.videoSupportedFrameRateRanges {
                     print(format)
-//                    if CMVideoFormatDescriptionGetDimensions(format.formatDescription).width != 3840 {
-//                        continue
-//                    }
                     if range.maxFrameRate > bestFrameRateRange?.maxFrameRate ?? 0 {
                         bestFormat = format
                         bestFrameRateRange = range
@@ -149,8 +149,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
                 }
             }
             let dims : CMVideoDimensions = CMVideoFormatDescriptionGetDimensions(captureInput!.device.activeFormat.formatDescription)
-            print(dims)
-            
+            print(dims)            
         }
            
         DispatchQueue(label: "prepare").async {
@@ -359,19 +358,27 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
     // MARK: - uploading to S3
     
     private func uploadVideoToS3(file: Data, uploadCredentials s3: VideoCredentials, completion: @escaping ((Error?) -> ())) {
+        
         let parameter = ["key": s3.key,
                          "AWSAccessKeyId": s3.accessKeyId,
                          "policy": s3.policy,
                          "signature": s3.signature]
-
+        
+        
+        delegate?.uploadingVideoStarted()
         AF.upload(multipartFormData: { multipartFormData in
-                for (key, value) in parameter {
-                    multipartFormData.append(value.data(using: .utf8)!, withName: key)
-                }
-                multipartFormData.append(file, withName: "file", fileName: s3.key, mimeType: "video/mp4")
-            },
-            to: s3.url, method: .post , headers: nil, requestModifier: { $0.timeoutInterval = 180.0})
+            for (key, value) in parameter {
+                multipartFormData.append(value.data(using: .utf8)!, withName: key)
+            }
+            multipartFormData.append(file, withName: "file", fileName: s3.key, mimeType: "video/mp4") },
+                  to: s3.url, method: .post , headers: nil, interceptor: RetryRequestInterceptor(retryCount: 2), requestModifier: { $0.timeoutInterval = 180.0 })
         .validate()
+        .uploadProgress(closure: { (progress) in
+            self.delegate?.updateUploadingProgress(progress: progress.fractionCompleted)
+            if progress.isFinished {
+                self.delegate?.didFinishUploadingVideo()
+            }
+        })
         .response { response in
             if let error = response.error {
                 self.delegate?.didFailedUploadingVideo(with: "Error uploading video to S3: \(error.localizedDescription)")

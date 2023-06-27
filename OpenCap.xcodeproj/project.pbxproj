@@ -13,6 +13,7 @@
 		241A02A828FED4CA00360CD5 /* Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = 241A02A728FED4CA00360CD5 /* Device.swift */; };
 		242A48CD28D356C2009ECC20 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 242A48CC28D356C2009ECC20 /* AppDelegate.swift */; };
 		242A48D128D35B46009ECC20 /* BottomActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 242A48D028D35B46009ECC20 /* BottomActivityView.swift */; };
+		244B99952A0EF75B00A940E6 /* RetryRequestInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 244B99942A0EF75B00A940E6 /* RetryRequestInterceptor.swift */; };
 		2460EB3528C8B403004A975E /* Reachability in Frameworks */ = {isa = PBXBuildFile; productRef = 2460EB3428C8B403004A975E /* Reachability */; };
 		246D082228C2465A003EC7B0 /* InstructionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 246D082128C2465A003EC7B0 /* InstructionView.swift */; };
 		246D082528C247A6003EC7B0 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 246D082428C247A6003EC7B0 /* Colors.swift */; };
@@ -35,6 +36,8 @@
 		241A02A728FED4CA00360CD5 /* Device.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Device.swift; sourceTree = "<group>"; };
 		242A48CC28D356C2009ECC20 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		242A48D028D35B46009ECC20 /* BottomActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomActivityView.swift; sourceTree = "<group>"; };
+		244B99942A0EF75B00A940E6 /* RetryRequestInterceptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RetryRequestInterceptor.swift; path = ../../RetryRequestInterceptor.swift; sourceTree = "<group>"; };
+		244B99982A0EF77300A940E6 /* RetryRequestInterceptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RetryRequestInterceptor.swift; path = ../../../RetryRequestInterceptor.swift; sourceTree = "<group>"; };
 		246D082128C2465A003EC7B0 /* InstructionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstructionView.swift; sourceTree = "<group>"; };
 		246D082428C247A6003EC7B0 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		246D082728C2517D003EC7B0 /* UXQRMiddleSquareView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UXQRMiddleSquareView.xib; sourceTree = "<group>"; };
@@ -84,6 +87,8 @@
 				24CA679828C693BC003F3159 /* CameraController.swift */,
 				24CA679A28C6944E003F3159 /* CameraViewController.swift */,
 				246D082428C247A6003EC7B0 /* Colors.swift */,
+				244B99962A0EF76700A940E6 /* Networking */,
+				244B99942A0EF75B00A940E6 /* RetryRequestInterceptor.swift */,
 				2496183B29ED7E8B003D5FF5 /* Model */,
 				246D082328C2465F003EC7B0 /* View */,
 				24CA679E28C69604003F3159 /* Extension */,
@@ -108,6 +113,14 @@
 				1FA1DCE42585D749002AC3BA /* AVFoundation.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		244B99962A0EF76700A940E6 /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				244B99982A0EF77300A940E6 /* RetryRequestInterceptor.swift */,
+			);
+			path = Networking;
 			sourceTree = "<group>";
 		};
 		246D082328C2465F003EC7B0 /* View */ = {
@@ -233,6 +246,7 @@
 				2496183A29ED7E63003D5FF5 /* VideoCredentials.swift in Sources */,
 				247E3558291EA030004B7265 /* Constants.swift in Sources */,
 				241A02A828FED4CA00360CD5 /* Device.swift in Sources */,
+				244B99952A0EF75B00A940E6 /* RetryRequestInterceptor.swift in Sources */,
 				242A48CD28D356C2009ECC20 /* AppDelegate.swift in Sources */,
 				246D082A28C2517D003EC7B0 /* UXQRMiddleSquareView.swift in Sources */,
 				24CA679B28C6944E003F3159 /* CameraViewController.swift in Sources */,
@@ -368,10 +382,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 22;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 25;
 				DEVELOPMENT_ASSET_PATHS = "\"MobileCap/Preview Content\"";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = WFQLYW8HYX;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = MobileCap/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
@@ -396,7 +410,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 25;
 				DEVELOPMENT_ASSET_PATHS = "\"MobileCap/Preview Content\"";
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = C785C9X8KV;
@@ -446,7 +460,7 @@
 			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 5.4.0;
+				minimumVersion = 5.7.0;
 			};
 		};
 		2460EB3328C8B403004A975E /* XCRemoteSwiftPackageReference "Reachability" */ = {
