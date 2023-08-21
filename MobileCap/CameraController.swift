@@ -13,6 +13,7 @@ protocol CameraControllerDelegate: AnyObject {
     func didScanQRCode()
     func didFailedUploadingVideo(with message: String?)
     func uploadingVideoStarted()
+    func uploadingVideoCanceled()
     func updateUploadingProgress(progress: Double)
     func didFinishUploadingVideo()
 }
@@ -38,7 +39,8 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
     var presignedUrl = ""
     var trialLink: String?
     var videoLink: String?
-    
+    var uploadVideoRequest: UploadRequest?
+
     var videoUrlNew: String?
 
     var lensPosition = Float(0.8)
@@ -266,6 +268,11 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
         self.videoOutput?.stopRecording()
     }
     
+    func stopUploadingVideo() {
+        uploadVideoRequest?.cancel()
+        delegate?.uploadingVideoCanceled()
+    }
+    
     func restartCamera() {
         if let metadataOutput = metadataOutput {
             captureSession?.addOutput(metadataOutput)
@@ -366,7 +373,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
         
         
         delegate?.uploadingVideoStarted()
-        AF.upload(multipartFormData: { multipartFormData in
+        uploadVideoRequest = AF.upload(multipartFormData: { multipartFormData in
             for (key, value) in parameter {
                 multipartFormData.append(value.data(using: .utf8)!, withName: key)
             }
