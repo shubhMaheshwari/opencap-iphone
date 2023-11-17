@@ -137,6 +137,7 @@ final class CameraViewController: UIViewController {
             }
         }
         
+   
     }
     
     func presentUploadingAlert() {
@@ -414,7 +415,14 @@ extension CameraViewController: CameraControllerDelegate {
     
     func didFailedUploadingVideo(with message: String?) {
         uploadingVideoAlertController.dismiss(animated: true)
-        presentErrorAlert(with: message)
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
+        present(alert, animated: true) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 15) {
+                alert.dismiss(animated: true, completion: nil)
+            }
+            
+        }
     }
 }
 
