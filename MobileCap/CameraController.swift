@@ -205,7 +205,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             return
         }
 
-        let videoUrl = NSURL.fileURL(withPathComponents: [ NSTemporaryDirectory(), "recording.mov"])
+        let videoUrl = NSURL.fileURL(withPathComponents: [ NSTemporaryDirectory(), "\(UUID().uuidString)recording.mov"])
         
         let connection = videoOutput!.connection(with: .video)!
        
