@@ -88,6 +88,10 @@ final class CameraViewController: UIViewController {
                         {
                             self?.cameraController.stopRecording()
                         }
+                        if self?.previousStatus == "uploading" && status == "ready" {
+                            print("Canceled or finished uploading!")
+                            self?.cameraController.stopUploadingVideo()
+                        }
                         self?.previousStatus = status
                     }
                     if let newSession = dictionary["newSessionURL"] as? String {
@@ -133,6 +137,7 @@ final class CameraViewController: UIViewController {
             }
         }
         
+   
     }
     
     func presentUploadingAlert() {
@@ -381,6 +386,12 @@ extension CameraViewController: CameraControllerDelegate {
         presentUploadingAlert()
     }
     
+    func uploadingVideoCanceled() {
+        DispatchQueue.main.async {
+            self.uploadingVideoAlertController.dismiss(animated: true)
+        }
+    }
+    
     func updateUploadingProgress(progress: Double) {
         DispatchQueue.main.async {
             let progressString = String(format: "%.0f", progress * 100)
@@ -404,7 +415,14 @@ extension CameraViewController: CameraControllerDelegate {
     
     func didFailedUploadingVideo(with message: String?) {
         uploadingVideoAlertController.dismiss(animated: true)
-        presentErrorAlert(with: message)
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
+        present(alert, animated: true) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 15) {
+                alert.dismiss(animated: true, completion: nil)
+            }
+            
+        }
     }
 }
 
