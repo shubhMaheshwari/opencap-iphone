@@ -5,13 +5,13 @@
 //  Created by Nik on 05.09.2022.
 //
 
-import UIKit
 import Alamofire
-import SwiftUI
-import SwiftMessages
-import Reachability
 import AVFoundation
 import CoreMotion
+import Reachability
+import SwiftMessages
+import SwiftUI
+import UIKit
 
 final class CameraViewController: UIViewController {
     weak var timer: Timer?
@@ -25,7 +25,7 @@ final class CameraViewController: UIViewController {
     let reachability = try! Reachability()
     var connectionErrorView: MessageView?
     var portraitLockWarningView: MessageView?
-    var progressDownload: UIProgressView = UIProgressView(progressViewStyle: .default)
+    var progressDownload: UIProgressView = .init(progressViewStyle: .default)
     let uploadingVideoAlertController = UIAlertController(title: " ", message: " ", preferredStyle: .alert)
 
     var currentInstructionType: InstructionTextType = .scan
@@ -48,71 +48,67 @@ final class CameraViewController: UIViewController {
         try? "Some string".write(to: localURL, atomically: true, encoding: .utf8)
                 
         timer = Timer.scheduledTimer(withTimeInterval: 1,
-                                      repeats: true,
-                                     block: { [weak self] timer in
-            guard let sesssionStatusUrl = self?.cameraController.sessionStatusUrl,
-                  let url = URL(string: sesssionStatusUrl) else { return }
+                                     repeats: true,
+                                     block: { [weak self] _ in
+                                         guard let sesssionStatusUrl = self?.cameraController.sessionStatusUrl,
+                                               let url = URL(string: sesssionStatusUrl) else { return }
             
-            let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
-                guard let data = data else { return }
-                //print(String(data: data, encoding: .utf8)!)
-                //print(String(self!.cameraController.sessionStatusUrl))
+                                         let task = URLSession.shared.dataTask(with: url) { data, _, _ in
+                                             guard let data = data else { return }
+                                             // print(String(data: data, encoding: .utf8)!)
+                                             // print(String(self!.cameraController.sessionStatusUrl))
                 
-                let json = try? JSONSerialization.jsonObject(with: data, options: [])
+                                             let json = try? JSONSerialization.jsonObject(with: data, options: [])
                 
-                if let dictionary = json as? [String: Any] {
-                    
-                    if let video = dictionary["url"] as? String {
-                        self!.cameraController.videoUrlNew = video
-                    }
-                    if let video = dictionary["video"] as? String {
-                        self!.cameraController.videoLink = video
-                    }
-                    if let lenspos = dictionary["lenspos"] as? Float {
-                        self!.cameraController.lensPosition = lenspos
-                    }
-                    if let trial = dictionary["trial"] as? String {
-                        self!.cameraController.trialLink = trial
-                    }
-                    if let status = dictionary["status"] as? String {
-                        print(status)
-                        if (self!.previousStatus != status && status == "recording")
-                        {
-                            var frameRate = Int32(60)
-                            if let desiredFrameRate = dictionary["framerate"] as? Int32 {
-                                frameRate = desiredFrameRate
-                            }
-                            self?.cameraController.recordVideo(frameRate: frameRate)
-                        }
-                        if (self!.previousStatus != status && status == "uploading")
-                        {
-                            self?.cameraController.stopRecording()
-                        }
-                        if self?.previousStatus == "uploading" && status == "ready" {
-                            print("Canceled or finished uploading!")
-                            self?.cameraController.stopUploadingVideo()
-                        }
-                        self?.previousStatus = status
-                    }
-                    if let newSession = dictionary["newSessionURL"] as? String {
-                        self?.cameraController.sessionStatusUrl = newSession + "?device_id=" + UIDevice.current.identifierForVendor!.uuidString
-                        print("Switched session to" + String(self!.cameraController.sessionStatusUrl))
-                    }
-                    
-                }
-                // if no "status" continue
-                // if data["status"] == "recording" then start recording
-                // if data["status"] == "uploading" then stop recording and submit the video
-            }
+                                             if let dictionary = json as? [String: Any] {
+                                                 if let video = dictionary["url"] as? String {
+                                                     self!.cameraController.videoUrlNew = video
+                                                 }
+                                                 if let video = dictionary["video"] as? String {
+                                                     self!.cameraController.videoLink = video
+                                                 }
+                                                 if let lenspos = dictionary["lenspos"] as? Float {
+                                                     self!.cameraController.lensPosition = lenspos
+                                                 }
+                                                 if let trial = dictionary["trial"] as? String {
+                                                     self!.cameraController.trialLink = trial
+                                                 }
+                                                 if let status = dictionary["status"] as? String {
+                                                     print(status)
+                                                     if self!.previousStatus != status, status == "recording" {
+                                                         var frameRate = Int32(60)
+                                                         if let desiredFrameRate = dictionary["framerate"] as? Int32 {
+                                                             frameRate = desiredFrameRate
+                                                         }
+                                                         self?.cameraController.recordVideo(frameRate: frameRate)
+                                                     }
+                                                     if self!.previousStatus != status, status == "uploading" {
+                                                         self?.cameraController.stopRecording()
+                                                     }
+                                                     if self?.previousStatus == "uploading", status == "ready" {
+                                                         print("Canceled or finished uploading!")
+                                                         self?.cameraController.stopUploadingVideo()
+                                                     }
+                                                     self?.previousStatus = status
+                                                 }
+                                                 if let newSession = dictionary["newSessionURL"] as? String {
+                                                     self?.cameraController.sessionStatusUrl = newSession + "?device_id=" + UIDevice.current.identifierForVendor!.uuidString
+                                                     print("Switched session to" + String(self!.cameraController.sessionStatusUrl))
+                                                 }
+                                             }
+                                             // if no "status" continue
+                                             // if data["status"] == "recording" then start recording
+                                             // if data["status"] == "uploading" then stop recording and submit the video
+                                         }
             
-            task.resume()
-        })
+                                         task.resume()
+                                     })
 
         view.backgroundColor = appBlue
 //        previewView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.height))
 
         previewView = Device.IS_IPHONE ? UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.height)) :
-                                       UIView(frame: CGRect(x: 0, y: 40, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.height - 160))
+            UIView(frame: CGRect(x: 0, y: 40, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.height - 160))
         previewView.contentMode = UIView.ContentMode.scaleAspectFit
         view.addSubview(previewView)
         UIView.setAnimationsEnabled(false)
@@ -122,12 +118,12 @@ final class CameraViewController: UIViewController {
         addBottomActivityView()
         addSquareView()
         NotificationCenter.default.addObserver(self,
-                                            selector: #selector(rotated),
-                                            name: UIDevice.orientationDidChangeNotification,
-                                            object: nil)
+                                               selector: #selector(rotated),
+                                               name: UIDevice.orientationDidChangeNotification,
+                                               object: nil)
         
         // Add observer for AVCaptureSession runtime errors
-        NotificationCenter.default.addObserver(forName: .AVCaptureSessionRuntimeError, object: self.cameraController.captureSession, queue: nil) { notification in
+        NotificationCenter.default.addObserver(forName: .AVCaptureSessionRuntimeError, object: cameraController.captureSession, queue: nil) { notification in
             // Handle the runtime error
             if let error = notification.userInfo?[AVCaptureSessionErrorKey] as? AVError {
                 let errorMessage = "AVCaptureSession runtime error: \(error.localizedDescription)"
@@ -136,8 +132,6 @@ final class CameraViewController: UIViewController {
                 FirebaseErrorLogger.shared.logError(with: .captureSession, message: errorMessage)
             }
         }
-        
-   
     }
     
     func presentUploadingAlert() {
@@ -163,7 +157,7 @@ final class CameraViewController: UIViewController {
         case .portrait:
             print("portrait")
             if shouldPresentInstructionView {
-                self.instructionView?.removeFromSuperview()
+                instructionView?.removeFromSuperview()
                 addInstructionView(for: .portrait)
                 updateInstructionViewText(for: .portrait)
                 removeInstructionView()
@@ -174,7 +168,7 @@ final class CameraViewController: UIViewController {
         case .portraitUpsideDown:
             print("portraitUpsideDown")
             if shouldPresentInstructionView {
-                self.instructionView?.removeFromSuperview()
+                instructionView?.removeFromSuperview()
                 addInstructionView(for: .portraitUpsideDown)
                 updateInstructionViewText(for: .portraitUpsideDown)
                 removeInstructionView()
@@ -186,7 +180,7 @@ final class CameraViewController: UIViewController {
         case .landscapeLeft:
             print("landscapeLeft")
             if shouldPresentInstructionView {
-                self.instructionView?.removeFromSuperview()
+                instructionView?.removeFromSuperview()
                 addInstructionView(for: .landscapeLeft)
                 updateInstructionViewText(for: .landscapeLeft)
                 removeInstructionView()
@@ -198,7 +192,7 @@ final class CameraViewController: UIViewController {
         case .landscapeRight:
             print("landscapeRight")
             if shouldPresentInstructionView {
-                self.instructionView?.removeFromSuperview()
+                instructionView?.removeFromSuperview()
                 addInstructionView(for: .landscapeRight)
                 updateInstructionViewText(for: .landscapeRight)
                 removeInstructionView()
@@ -207,10 +201,9 @@ final class CameraViewController: UIViewController {
             addBottomActivityView()
             bottomActivityView?.logoImageView?.rotate(angle: -90)
             bottomActivityView?.actionsButton?.rotate(angle: -90)
-        default :
+        default:
             return
         }
-
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -220,15 +213,16 @@ final class CameraViewController: UIViewController {
     
     func setupNetworkObserver() {
         NotificationCenter.default.addObserver(self, selector: #selector(reachabilityChanged(note:)), name: .reachabilityChanged, object: reachability)
-          do{
+        do {
             try reachability.startNotifier()
-          }catch{
+        }
+        catch {
             print("could not start reachability notifier")
-          }
+        }
     }
     
     func prepareCamera() {
-        cameraController.prepare {(error) in
+        cameraController.prepare { error in
             if let error = error {
                 print(error)
             }
@@ -238,20 +232,19 @@ final class CameraViewController: UIViewController {
     }
     
     @objc func reachabilityChanged(note: Notification) {
+        let reachability = note.object as! Reachability
 
-      let reachability = note.object as! Reachability
-
-      switch reachability.connection {
-      case .wifi:
-          print("Reachable via WiFi")
-          self.dismissSwiftMessage(with: .noInternetConnection)
-      case .cellular:
-          print("Reachable via Cellular")
-          self.dismissSwiftMessage(with: .noInternetConnection)
-      case .unavailable:
-          self.presentNoInternetConnectionError()
-        print("Network not reachable")
-      }
+        switch reachability.connection {
+        case .wifi:
+            print("Reachable via WiFi")
+            dismissSwiftMessage(with: .noInternetConnection)
+        case .cellular:
+            print("Reachable via Cellular")
+            dismissSwiftMessage(with: .noInternetConnection)
+        case .unavailable:
+            presentNoInternetConnectionError()
+            print("Network not reachable")
+        }
     }
     
     func presentNoInternetConnectionError() {
@@ -293,7 +286,7 @@ final class CameraViewController: UIViewController {
     }
     
     func dismissSwiftMessage(with id: AlertMessagesIds) {
-         SwiftMessages.hide(id: id.rawValue)
+        SwiftMessages.hide(id: id.rawValue)
     }
     
     func addSquareView() {
@@ -301,10 +294,10 @@ final class CameraViewController: UIViewController {
         guard let squareView = squareView else {
             return
         }
-        squareView.center = self.view.center
+        squareView.center = view.center
         squareView.autoresizingMask = [.flexibleTopMargin, .flexibleRightMargin, .flexibleLeftMargin, .flexibleBottomMargin]
 
-        self.view.addSubview(squareView)
+        view.addSubview(squareView)
     }
     
     func removeSquareView() {
@@ -314,37 +307,37 @@ final class CameraViewController: UIViewController {
     func addInstructionView(for orientation: UIDeviceOrientation) {
         switch UIDevice.current.orientation {
         case .portrait:
-            instructionView = InstructionView(frame: CGRect.init(x: self.view.frame.width * 0.1, y: 84, width: self.view.frame.width * 0.8, height: self.view.frame.height / 5))
+            instructionView = InstructionView(frame: CGRect(x: view.frame.width * 0.1, y: 84, width: view.frame.width * 0.8, height: view.frame.height / 5))
         case .portraitUpsideDown:
             print("portraitUpsideDown")
-            instructionView = InstructionView(frame: CGRect.init(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height / 5))
+            instructionView = InstructionView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height / 5))
         case .landscapeLeft:
             print("landscapeLeft")
             let div: CGFloat = Device.IS_IPHONE ? 6 : 6
-            instructionView = InstructionView(frame: CGRect.init(x: 200, y: self.view.frame.midY, width: self.view.frame.height * 0.7, height: self.view.frame.height*0.5 / div), label: true)
-            instructionView?.center = CGPoint(x: self.view.frame.maxX-50, y: self.view.frame.midY)
+            instructionView = InstructionView(frame: CGRect(x: 200, y: view.frame.midY, width: view.frame.height * 0.7, height: view.frame.height * 0.5 / div), label: true)
+            instructionView?.center = CGPoint(x: view.frame.maxX - 50, y: view.frame.midY)
             instructionView?.rotate(angle: 90)
             instructionView?.addLabel()
         case .landscapeRight:
             let div: CGFloat = Device.IS_IPHONE ? 6 : 6
-            instructionView = InstructionView(frame: CGRect.init(x: 200, y: self.view.frame.midY, width: self.view.frame.height * 0.7, height: self.view.frame.height*0.5 / div), label: true)
-            instructionView?.center = CGPoint(x: self.view.frame.minX+50, y: self.view.frame.midY)
+            instructionView = InstructionView(frame: CGRect(x: 200, y: view.frame.midY, width: view.frame.height * 0.7, height: view.frame.height * 0.5 / div), label: true)
+            instructionView?.center = CGPoint(x: view.frame.minX + 50, y: view.frame.midY)
             instructionView?.rotate(angle: -90)
             instructionView?.addLabel()
             print("landscapeRight")
-        default :
-            instructionView = InstructionView(frame: CGRect.init(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height / 5))
+        default:
+            instructionView = InstructionView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height / 5))
         }
         instructionView!.autoresizingMask = [.flexibleHeight, .flexibleWidth, .flexibleTopMargin, .flexibleRightMargin, .flexibleLeftMargin, .flexibleBottomMargin]
 
         guard let instructionView = instructionView else {
             return
         }
-        self.view.addSubview(instructionView)
+        view.addSubview(instructionView)
     }
     
     func removeInstructionView() {
-        guard currentInstructionType != .scan  else { return }
+        guard currentInstructionType != .scan else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 30.0) {
             self.instructionView?.removeFromSuperview()
             self.shouldPresentInstructionView = false
@@ -354,20 +347,21 @@ final class CameraViewController: UIViewController {
     func updateInstructionViewText(for orientation: UIDeviceOrientation? = nil) {
         if currentInstructionType == .scan {
             instructionView?.titleLabel?.text = orientation == .landscapeLeft || orientation == .landscapeRight ? InstructionTextType.scanFullText.rawValue : InstructionTextType.scan.rawValue
-        } else {
+        }
+        else {
             instructionView?.titleLabel?.text = currentInstructionType.rawValue
         }
     }
     
     func addBottomActivityView() {
-        bottomActivityView = BottomActivityView(frame: CGRect(x: 0, y: UIScreen.main.bounds.size.height-100, width: UIScreen.main.bounds.size.width, height: 100))
+        bottomActivityView = BottomActivityView(frame: CGRect(x: 0, y: UIScreen.main.bounds.size.height - 100, width: UIScreen.main.bounds.size.width, height: 100))
 
         bottomActivityView?.delegate = self
         
         guard let bottomActivityView = bottomActivityView else {
             return
         }
-        self.view.addSubview(bottomActivityView)
+        view.addSubview(bottomActivityView)
     }
     
     func removeBottomActivityView() {
@@ -377,7 +371,7 @@ final class CameraViewController: UIViewController {
     func presentErrorAlert(with message: String?) {
         let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
-        self.present(alert, animated: true, completion: nil)
+        present(alert, animated: true, completion: nil)
     }
 }
 
@@ -421,7 +415,6 @@ extension CameraViewController: CameraControllerDelegate {
             DispatchQueue.main.asyncAfter(deadline: .now() + 15) {
                 alert.dismiss(animated: true, completion: nil)
             }
-            
         }
     }
 }
@@ -430,76 +423,74 @@ extension CameraViewController: BottomActivityViewDelegate {
     func didTapActionButton() {
         let alert = UIAlertController(title: "", message: "Please select an option", preferredStyle: UIDevice.current.userInterfaceIdiom == .pad ? .alert : .actionSheet)
            
-           alert.addAction(UIAlertAction(title: "Start a new session", style: .default , handler:{ (UIAlertAction)in
-               print("User click Start a new session")
-               DispatchQueue.main.async {
-                   self.cameraController.sessionStatusUrl = "https://api.opencap.ai"
-                   self.cameraController.setAutoFocus()
-                   self.timer?.invalidate()
+        alert.addAction(UIAlertAction(title: "Start a new session", style: .default, handler: { _ in
+            print("User click Start a new session")
+            DispatchQueue.main.async {
+                self.cameraController.sessionStatusUrl = "https://api.opencap.ai"
+                self.cameraController.setAutoFocus()
+                self.timer?.invalidate()
                    
-                   let viewController = CameraViewController()
-                   viewController.modalPresentationStyle = .fullScreen
-                   self.present(viewController, animated: true)
-               }
-           }))
+                let viewController = CameraViewController()
+                viewController.modalPresentationStyle = .fullScreen
+                self.present(viewController, animated: true)
+            }
+        }))
         
-           alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler:{ (UIAlertAction)in
-               print("User click Dismiss button")
-           }))
+        alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: { _ in
+            print("User click Dismiss button")
+        }))
         
-           self.present(alert, animated: true, completion: {
-               print("completion block")
-           })
+        present(alert, animated: true, completion: {
+            print("completion block")
+        })
     }
 }
 
 extension CameraViewController {
-
     func updateVideoOrientation(orientaion: AVCaptureVideoOrientation) {
-        guard let videoPreviewLayer = self.cameraController.previewLayer else {
-                return
-            }
-            guard videoPreviewLayer.connection!.isVideoOrientationSupported else {
-                print("isVideoOrientationSupported is false")
-                return
-            }
-            let videoOrientation: AVCaptureVideoOrientation = orientaion
-            videoPreviewLayer.frame = view.layer.frame
-            videoPreviewLayer.connection?.videoOrientation = videoOrientation
-            videoPreviewLayer.removeAllAnimations()
+        guard let videoPreviewLayer = cameraController.previewLayer else {
+            return
+        }
+        guard videoPreviewLayer.connection!.isVideoOrientationSupported else {
+            print("isVideoOrientationSupported is false")
+            return
+        }
+        let videoOrientation: AVCaptureVideoOrientation = orientaion
+        videoPreviewLayer.frame = view.layer.frame
+        videoPreviewLayer.connection?.videoOrientation = videoOrientation
+        videoPreviewLayer.removeAllAnimations()
     }
     
     func addCoreMotion() {
-        let splitAngle:Double = 0.75
-        let updateTimer:TimeInterval = 2
+        let splitAngle = 0.75
+        let updateTimer: TimeInterval = 2
 
         motionManager = CMMotionManager()
         motionManager?.gyroUpdateInterval = updateTimer
         motionManager?.accelerometerUpdateInterval = updateTimer
 
-        var orientationLast    = UIInterfaceOrientation(rawValue: 0)!
+        var orientationLast = UIInterfaceOrientation(rawValue: 0)!
 
         motionManager?.startAccelerometerUpdates(to: (OperationQueue.current)!, withHandler: {
-            (acceleroMeterData, error) -> Void in
+            acceleroMeterData, error in
             if error == nil {
-
                 let acceleration = (acceleroMeterData?.acceleration)!
                 var orientationNew = UIInterfaceOrientation(rawValue: 0)!
 
                 if acceleration.x >= splitAngle {
                     orientationNew = .landscapeLeft
                 }
-                else if acceleration.x <= -(splitAngle) {
+                else if acceleration.x <= -splitAngle {
                     orientationNew = .landscapeRight
                 }
-                else if acceleration.y <= -(splitAngle) {
+                else if acceleration.y <= -splitAngle {
                     orientationNew = .portrait
                 }
                 else if acceleration.y >= splitAngle {
                     orientationNew = .portraitUpsideDown
                 }
 
-                if orientationNew != orientationLast && orientationNew != .unknown{
+                if orientationNew != orientationLast, orientationNew != .unknown {
                     orientationLast = orientationNew
                     self.deviceOrientationChanged(orinetation: orientationNew)
                 }
@@ -511,13 +502,11 @@ extension CameraViewController {
     }
     
     func deviceOrientationChanged(orinetation: UIInterfaceOrientation) {
-        if orinetation.isLandscape && UIDevice.current.orientation.isPortrait {
+        if orinetation.isLandscape, UIDevice.current.orientation.isPortrait {
             presentPortraitLockWarningMessage()
-        } else {
+        }
+        else {
             dismissSwiftMessage(with: .portraitLockWarning)
         }
-     }
+    }
 }
-
-
-
