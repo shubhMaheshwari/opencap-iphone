@@ -185,6 +185,8 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
         }
         print(self.frontCamera?.activeFormat ?? "No camera set yet")
         
+        self.frontCamera?.unlockForConfiguration()
+
         guard let captureSession = self.captureSession, captureSession.isRunning else {
             return
         }
@@ -254,7 +256,6 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             self.frontCamera?.setFocusModeLocked(lensPosition: self.lensPosition) { _ in
                 print("Focus locked at position: \(self.lensPosition)")
             }
-            self.frontCamera?.unlockForConfiguration()
         }
         catch {
             print("Failed to lock focus: \(error)")
