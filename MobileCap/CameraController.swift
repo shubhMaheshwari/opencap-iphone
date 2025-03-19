@@ -174,18 +174,27 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
     }
     
     func recordVideo(frameRate: Int32) {
-        if let bestFormat = self.bestFormat {
-            self.frontCamera!.activeFormat = bestFormat
-            // Set the device's min/max frame duration.
-            let duration = CMTimeMake(value: 1, timescale: frameRate)
-            self.frontCamera?.activeVideoMinFrameDuration = duration
-            self.frontCamera?.activeVideoMaxFrameDuration = duration
-            let durationSec = Float(CMTimeGetSeconds(duration))
-            print("Duration set to " + String(format: "%.2f", durationSec))
+        guard let frontCamera = self.frontCamera else { return }
+
+        do {
+            try frontCamera.lockForConfiguration()
+
+            if let bestFormat = self.bestFormat {
+                frontCamera.activeFormat = bestFormat
+                // Set the device's min/max frame duration.
+                let duration = CMTimeMake(value: 1, timescale: frameRate)
+                frontCamera.activeVideoMinFrameDuration = duration
+                frontCamera.activeVideoMaxFrameDuration = duration
+                let durationSec = Float(CMTimeGetSeconds(duration))
+                print("Duration set to " + String(format: "%.2f", durationSec))
+            }
+            print(frontCamera.activeFormat)
+
+            frontCamera.unlockForConfiguration()
         }
-        print(self.frontCamera?.activeFormat ?? "No camera set yet")
-        
-        self.frontCamera?.unlockForConfiguration()
+        catch {
+            print("Failed to lock configuration: \(error)")
+        }
 
         guard let captureSession = self.captureSession, captureSession.isRunning else {
             return
