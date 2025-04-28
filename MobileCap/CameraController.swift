@@ -5,9 +5,9 @@
 //  Created by Nik on 05.09.2022.
 //
 
-import SwiftUI
-import AVFoundation
 import Alamofire
+import AVFoundation
+import SwiftUI
 
 protocol CameraControllerDelegate: AnyObject {
     func didScanQRCode()
@@ -19,12 +19,12 @@ protocol CameraControllerDelegate: AnyObject {
 }
 
 enum CameraControllerError: Swift.Error {
-   case captureSessionAlreadyRunning
-   case captureSessionIsMissing
-   case inputsAreInvalid
-   case invalidOperation
-   case noCamerasAvailable
-   case unknown
+    case captureSessionAlreadyRunning
+    case captureSessionIsMissing
+    case inputsAreInvalid
+    case invalidOperation
+    case noCamerasAvailable
+    case unknown
 }
 
 class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCaptureFileOutputRecordingDelegate {
@@ -48,7 +48,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
     weak var delegate: CameraControllerDelegate?
     
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
-        captureSession?.removeOutput(self.metadataOutput!)
+        self.captureSession?.removeOutput(self.metadataOutput!)
         if let metadataObject = metadataObjects.first {
             guard let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject else { return }
             guard let stringValue = readableObject.stringValue else { return }
@@ -60,19 +60,18 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             self.sessionStatusUrl = stringValue + "?device_id=" + UIDevice.current.identifierForVendor!.uuidString
             self.presignedUrl = stringValue.replacingOccurrences(of: "/status", with: "") + "get_presigned_url/"
             print(self.sessionStatusUrl)
-            delegate?.didScanQRCode()
+            self.delegate?.didScanQRCode()
+            self.setFixedFocus()
         }
     }
 
-    func prepare(completionHandler: @escaping (Error?) -> Void){
-        func createCaptureSession(){
+    func prepare(completionHandler: @escaping (Error?) -> Void) {
+        func createCaptureSession() {
             self.captureSession = AVCaptureSession()
         }
         func configureCameraForHighestFrameRate(device: AVCaptureDevice) {
-            
             var bestFormat: AVCaptureDevice.Format?
             var bestFrameRateRange: AVFrameRateRange?
-
 
             for format in device.formats {
                 for range in format.videoSupportedFrameRateRanges {
@@ -87,7 +86,8 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             print(bestFormat)
             print(bestFrameRateRange)
             if let bestFormat = bestFormat,
-               let bestFrameRateRange = bestFrameRateRange {
+               let bestFrameRateRange = bestFrameRateRange
+            {
                 do {
                     try device.lockForConfiguration()
                     
@@ -96,7 +96,8 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
                     device.activeVideoMaxFrameDuration = bestFrameRateRange.minFrameDuration
                     device.activeVideoMinFrameDuration = bestFrameRateRange.minFrameDuration
                     device.unlockForConfiguration()
-                } catch {
+                }
+                catch {
                     print("Can't change the framerate")
                     // Handle error.
                 }
@@ -112,7 +113,6 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
 //            try camera?.lockForConfiguration()
             configureCameraForHighestFrameRate(device: camera!)
 //            camera?.unlockForConfiguration()
-                
         }
         
         func configureDeviceInputs() throws {
@@ -121,12 +121,12 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             if let frontCamera = self.frontCamera {
                 self.frontCameraInput = try AVCaptureDeviceInput(device: frontCamera)
                 
-                if captureSession.canAddInput(self.frontCameraInput!) { captureSession.addInput(self.frontCameraInput!)}
+                if captureSession.canAddInput(self.frontCameraInput!) { captureSession.addInput(self.frontCameraInput!) }
                 else { throw CameraControllerError.inputsAreInvalid }
                 
                 let metadataOutput = AVCaptureMetadataOutput()
 
-                if (captureSession.canAddOutput(metadataOutput)) {
+                if captureSession.canAddOutput(metadataOutput) {
                     self.metadataOutput = AVCaptureMetadataOutput()
                     captureSession.addOutput(self.metadataOutput!)
 
@@ -139,19 +139,17 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
                     self.videoOutput = AVCaptureMovieFileOutput()
                     captureSession.addOutput(self.videoOutput!)
                 }
-                else{
+                else {
                     print("Can't configure")
                 }
             }
             else { throw CameraControllerError.noCamerasAvailable }
             captureSession.startRunning()
-            var captureInput : AVCaptureDeviceInput?{
-                get{
-                    return self.captureSession?.inputs.first as? AVCaptureDeviceInput
-                }
+            var captureInput: AVCaptureDeviceInput? {
+                return self.captureSession?.inputs.first as? AVCaptureDeviceInput
             }
-            let dims : CMVideoDimensions = CMVideoFormatDescriptionGetDimensions(captureInput!.device.activeFormat.formatDescription)
-            print(dims)            
+            let dims: CMVideoDimensions = CMVideoFormatDescriptionGetDimensions(captureInput!.device.activeFormat.formatDescription)
+            print(dims)
         }
            
         DispatchQueue(label: "prepare").async {
@@ -162,7 +160,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             }
                 
             catch {
-                DispatchQueue.main.async{
+                DispatchQueue.main.async {
                     completionHandler(error)
                 }
                 
@@ -176,63 +174,60 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
     }
     
     func recordVideo(frameRate: Int32) {
+        guard let frontCamera = self.frontCamera else { return }
+
         do {
-            try self.frontCamera?.lockForConfiguration()
+            try frontCamera.lockForConfiguration()
+
+            if let bestFormat = self.bestFormat {
+                frontCamera.activeFormat = bestFormat
+                // Set the device's min/max frame duration.
+                let duration = CMTimeMake(value: 1, timescale: frameRate)
+                frontCamera.activeVideoMinFrameDuration = duration
+                frontCamera.activeVideoMaxFrameDuration = duration
+                let durationSec = Float(CMTimeGetSeconds(duration))
+                print("Duration set to " + String(format: "%.2f", durationSec))
+            }
+            print(frontCamera.activeFormat)
+
+            frontCamera.unlockForConfiguration()
         }
         catch {
-            return
+            print("Failed to lock configuration: \(error)")
         }
-        
-        self.frontCamera?.setFocusModeLocked(lensPosition: lensPosition) {
-            (time:CMTime) -> Void in
-        }
-        if let bestFormat = self.bestFormat {
-            self.frontCamera!.activeFormat = bestFormat
-            // Set the device's min/max frame duration.
-            let duration = CMTimeMake(value: 1,timescale: frameRate)
-            self.frontCamera?.activeVideoMinFrameDuration = duration
-            self.frontCamera?.activeVideoMaxFrameDuration = duration
-            let durationSec =  Float(CMTimeGetSeconds(duration))
-            print("Duration set to "+String(format: "%.2f", durationSec))
-        }
-        print(self.frontCamera?.activeFormat ?? "No camera set yet")
-        
 
-        self.frontCamera?.unlockForConfiguration()
-
-        
         guard let captureSession = self.captureSession, captureSession.isRunning else {
             return
         }
 
-        let videoUrl = NSURL.fileURL(withPathComponents: [ NSTemporaryDirectory(), "\(UUID().uuidString)recording.mov"])
+        let videoUrl = NSURL.fileURL(withPathComponents: [NSTemporaryDirectory(), "\(UUID().uuidString)recording.mov"])
         
-        let connection = videoOutput!.connection(with: .video)!
+        let connection = self.videoOutput!.connection(with: .video)!
        
         // enable the flag
         if #available(iOS 11.0, *), connection.isCameraIntrinsicMatrixDeliverySupported {
             connection.isCameraIntrinsicMatrixDeliveryEnabled = true
         }
-        if (connection.isVideoStabilizationSupported) {
-            connection.preferredVideoStabilizationMode = AVCaptureVideoStabilizationMode.off;
+        if connection.isVideoStabilizationSupported {
+            connection.preferredVideoStabilizationMode = AVCaptureVideoStabilizationMode.off
         }
 
         var rotateValue = ""
         let newOrientation: AVCaptureVideoOrientation
         switch Device.currentDeviceOrientation {
         case .portrait:
-            newOrientation = .portrait //2
+            newOrientation = .portrait // 2
             rotateValue = "90"
         case .portraitUpsideDown:
-            newOrientation = .portraitUpsideDown //1
+            newOrientation = .portraitUpsideDown // 1
             rotateValue = "270"
         case .landscapeLeft:
-            newOrientation = .landscapeRight //4
+            newOrientation = .landscapeRight // 4
             rotateValue = "0"
         case .landscapeRight:
-            newOrientation = .landscapeLeft //3
+            newOrientation = .landscapeLeft // 3
             rotateValue = "180"
-        default :
+        default:
             newOrientation = .portrait
             rotateValue = "90"
         }
@@ -241,9 +236,9 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
         let descriptionItem = AVMutableMetadataItem()
         descriptionItem.identifier = .quickTimeMetadataVideoOrientation
         descriptionItem.value = rotateValue as (NSCopying & NSObjectProtocol)?
-        videoOutput!.metadata = [descriptionItem]
+        self.videoOutput!.metadata = [descriptionItem]
         
-        videoOutput!.startRecording(to: videoUrl!, recordingDelegate: self)
+        self.videoOutput!.startRecording(to: videoUrl!, recordingDelegate: self)
         print("RECORDING STARTED: " + videoUrl!.absoluteString)
 //        self.videoRecordCompletionBlock = completion
     }
@@ -264,18 +259,32 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
         return Int(maxFrameRate)
     }
     
+    func setFixedFocus() {
+        do {
+            try self.frontCamera?.lockForConfiguration()
+            self.frontCamera?.setFocusModeLocked(lensPosition: self.lensPosition) { _ in
+                print("Focus locked at position: \(self.lensPosition)")
+            }
+            
+            self.frontCamera?.unlockForConfiguration()
+        }
+        catch {
+            print("Failed to lock focus: \(error)")
+        }
+    }
+    
     func stopRecording() {
         self.videoOutput?.stopRecording()
     }
     
     func stopUploadingVideo() {
-        uploadVideoRequest?.cancel()
-        delegate?.uploadingVideoCanceled()
+        self.uploadVideoRequest?.cancel()
+        self.delegate?.uploadingVideoCanceled()
     }
     
     func restartCamera() {
         if let metadataOutput = metadataOutput {
-            captureSession?.addOutput(metadataOutput)
+            self.captureSession?.addOutput(metadataOutput)
         }
     }
     
@@ -286,19 +295,20 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
         catch {
             return
         }
-        frontCamera?.focusMode = .continuousAutoFocus
+        self.frontCamera?.focusMode = .continuousAutoFocus
         self.frontCamera?.unlockForConfiguration()
     }
     
-    func captureOutput(_ captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, from connection: AVCaptureConnection!){
-        let connection = videoOutput!.connection(with: .video)!
+    func captureOutput(_ captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, from connection: AVCaptureConnection!) {
+        let connection = self.videoOutput!.connection(with: .video)!
         if #available(iOS 11.0, *), connection.isCameraIntrinsicMatrixDeliverySupported {
-            if let camData = CMGetAttachment(sampleBuffer, key:kCMSampleBufferAttachmentKey_CameraIntrinsicMatrix, attachmentModeOut:nil) as? Data {
+            if let camData = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_CameraIntrinsicMatrix, attachmentModeOut: nil) as? Data {
                 let matrix: matrix_float3x3 = camData.withUnsafeBytes { $0.pointee }
                 print(matrix)
             }
         }
     }
+
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
         guard let frontCamera = frontCamera else { return }
         if error == nil {
@@ -309,7 +319,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             
             let videoURL = URL(string: self.apiUrl + self.videoLink!)
             
-            if (file != nil) {
+            if file != nil {
                 print("Updating video: " + videoURL!.absoluteString)
                 let sfov = String(self.frontCamera!.activeFormat.videoFieldOfView.description)
                 
@@ -317,21 +327,21 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
                 uname(&systemInfo)
                 let modelCode = withUnsafePointer(to: &systemInfo.machine) {
                     $0.withMemoryRebound(to: CChar.self, capacity: 1) {
-                        ptr in String.init(validatingUTF8: ptr)
+                        ptr in String(validatingUTF8: ptr)
                     }
                 }
                 let modelCodeStr = String(modelCode!)
-                let maxFrameRate = getMaxFrameRate()
+                let maxFrameRate = self.getMaxFrameRate()
                 fetchVideoCredentials { videoCredentials, error in
                     guard let videoCredentials = videoCredentials else {
                         return
                     }
                     self.uploadVideoToS3(file: file!, uploadCredentials: videoCredentials) { error in
                         if error == nil {
-                            let params = ["video_url" : videoCredentials.key,
-                                          "parameters": [ "fov" : sfov,
-                                                          "model" : modelCodeStr,
-                                                          "max_framerate" : maxFrameRate]]
+                            let params = ["video_url": videoCredentials.key,
+                                          "parameters": ["fov": sfov,
+                                                         "model": modelCodeStr,
+                                                         "max_framerate": maxFrameRate]]
                             
                             AF.request(videoURL?.absoluteString ?? "", method: .patch, parameters: params, encoding: JSONEncoding.default)
                                 .responseJSON { response in
@@ -346,7 +356,8 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
                     }
                 }
             }
-        } else {
+        }
+        else {
             print("ERROR")
         }
     }
@@ -364,49 +375,50 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
     
     // MARK: - uploading to S3
     
-    private func uploadVideoToS3(file: Data, uploadCredentials s3: VideoCredentials, completion: @escaping ((Error?) -> ())) {
-        
+    private func uploadVideoToS3(file: Data, uploadCredentials s3: VideoCredentials, completion: @escaping ((Error?) -> Void)) {
         let parameter = ["key": s3.key,
                          "AWSAccessKeyId": s3.accessKeyId,
                          "policy": s3.policy,
                          "signature": s3.signature]
         
-        
-        delegate?.uploadingVideoStarted()
-        uploadVideoRequest = AF.upload(multipartFormData: { multipartFormData in
-            for (key, value) in parameter {
-                multipartFormData.append(value.data(using: .utf8)!, withName: key)
+        self.delegate?.uploadingVideoStarted()
+        self.uploadVideoRequest = AF.upload(multipartFormData: { multipartFormData in
+                                                for (key, value) in parameter {
+                                                    multipartFormData.append(value.data(using: .utf8)!, withName: key)
+                                                }
+                                                multipartFormData.append(file, withName: "file", fileName: s3.key, mimeType: "video/mp4")
+                                            },
+                                            to: s3.url, method: .post, headers: nil, interceptor: RetryRequestInterceptor(retryCount: 2), requestModifier: { $0.timeoutInterval = 180.0 })
+            .validate()
+            .uploadProgress(closure: { progress in
+                self.delegate?.updateUploadingProgress(progress: progress.fractionCompleted)
+                if progress.isFinished {
+                    self.delegate?.didFinishUploadingVideo()
+                }
+            })
+            .response { response in
+                if let error = response.error {
+                    self.delegate?.didFailedUploadingVideo(with: "Error uploading video to S3: \(error.localizedDescription)")
+                    completion(error)
+                }
+                else {
+                    print("Successfully uploaded video to S3 \(response)")
+                    completion(nil)
+                }
             }
-            multipartFormData.append(file, withName: "file", fileName: s3.key, mimeType: "video/mp4") },
-                  to: s3.url, method: .post , headers: nil, interceptor: RetryRequestInterceptor(retryCount: 2), requestModifier: { $0.timeoutInterval = 180.0 })
-        .validate()
-        .uploadProgress(closure: { (progress) in
-            self.delegate?.updateUploadingProgress(progress: progress.fractionCompleted)
-            if progress.isFinished {
-                self.delegate?.didFinishUploadingVideo()
-            }
-        })
-        .response { response in
-            if let error = response.error {
-                self.delegate?.didFailedUploadingVideo(with: "Error uploading video to S3: \(error.localizedDescription)")
-                completion(error)
-            } else {
-                print("Successfully uploaded video to S3 \(response)")
-                completion(nil)
-            }
-        }
     }
 }
 
 extension CameraController {
-    func fetchVideoCredentials(completion: @escaping ((VideoCredentials?, Error?) -> ())) {
+    func fetchVideoCredentials(completion: @escaping ((VideoCredentials?, Error?) -> Void)) {
         if let url = URL(string: presignedUrl) {
-            URLSession.shared.dataTask(with: url) { data, response, error in
+            URLSession.shared.dataTask(with: url) { data, _, error in
                 if let data = data {
                     do {
                         let videoCredentials = try JSONDecoder().decode(VideoCredentials.self, from: data)
                         completion(videoCredentials, nil)
-                    } catch let error {
+                    }
+                    catch {
                         print(error)
                         self.delegate?.didFailedUploadingVideo(with: "Error fetching presign URL: \(error.localizedDescription)")
                         completion(nil, error)
