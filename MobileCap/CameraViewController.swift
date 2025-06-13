@@ -50,57 +50,55 @@ final class CameraViewController: UIViewController {
         timer = Timer.scheduledTimer(withTimeInterval: 1,
                                      repeats: true,
                                      block: { [weak self] _ in
-                                         guard let sesssionStatusUrl = self?.cameraController.sessionStatusUrl,
-                                               let url = URL(string: sesssionStatusUrl) else { return }
-            
-                                         let task = URLSession.shared.dataTask(with: url) { data, _, _ in
-                                             guard let data = data else { return }
-                                             // print(String(data: data, encoding: .utf8)!)
-                                             // print(String(self!.cameraController.sessionStatusUrl))
-                
+                                         guard let self = self,
+                                               let url = URL(string: self.cameraController.sessionStatusUrl) else { return }
+
+                                         let task = URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
+                                             guard let self = self, let data = data else { return }
+
                                              let json = try? JSONSerialization.jsonObject(with: data, options: [])
-                
+
                                              if let dictionary = json as? [String: Any] {
                                                  if let video = dictionary["url"] as? String {
-                                                     self!.cameraController.videoUrlNew = video
+                                                     self.cameraController.videoUrlNew = video
                                                  }
                                                  if let video = dictionary["video"] as? String {
-                                                     self!.cameraController.videoLink = video
+                                                     self.cameraController.videoLink = video
                                                  }
                                                  if let lenspos = dictionary["lenspos"] as? Float {
-                                                     self!.cameraController.lensPosition = lenspos
+                                                     self.cameraController.lensPosition = lenspos
                                                  }
                                                  if let trial = dictionary["trial"] as? String {
-                                                     self!.cameraController.trialLink = trial
+                                                     self.cameraController.trialLink = trial
                                                  }
                                                  if let status = dictionary["status"] as? String {
                                                      print(status)
-                                                     if self!.previousStatus != status, status == "recording" {
+                                                     if self.previousStatus != status, status == "recording" {
                                                          var frameRate = Int32(60)
                                                          if let desiredFrameRate = dictionary["framerate"] as? Int32 {
                                                              frameRate = desiredFrameRate
                                                          }
-                                                         self?.cameraController.recordVideo(frameRate: frameRate)
+                                                         self.cameraController.recordVideo(frameRate: frameRate)
                                                      }
-                                                     if self!.previousStatus != status, status == "uploading" {
-                                                         self?.cameraController.stopRecording()
+                                                     if self.previousStatus != status, status == "uploading" {
+                                                         self.cameraController.stopRecording()
                                                      }
-                                                     if self?.previousStatus == "uploading", status == "ready" {
+                                                     if self.previousStatus == "uploading", status == "ready" {
                                                          print("Canceled or finished uploading!")
-                                                         self?.cameraController.stopUploadingVideo()
+                                                         self.cameraController.stopUploadingVideo()
                                                      }
-                                                     self?.previousStatus = status
+                                                     self.previousStatus = status
                                                  }
                                                  if let newSession = dictionary["newSessionURL"] as? String {
-                                                     self?.cameraController.sessionStatusUrl = newSession + "?device_id=" + UIDevice.current.identifierForVendor!.uuidString
-                                                     print("Switched session to" + String(self!.cameraController.sessionStatusUrl))
+                                                     self.cameraController.sessionStatusUrl = newSession + "?device_id=" + UIDevice.current.identifierForVendor!.uuidString
+                                                     print("Switched session to" + String(self.cameraController.sessionStatusUrl))
                                                  }
                                              }
                                              // if no "status" continue
                                              // if data["status"] == "recording" then start recording
                                              // if data["status"] == "uploading" then stop recording and submit the video
                                          }
-            
+
                                          task.resume()
                                      })
 
