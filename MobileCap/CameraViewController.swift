@@ -61,18 +61,9 @@ final class CameraViewController: UIViewController {
                                              let json = try? JSONSerialization.jsonObject(with: data, options: [])
                 
                                              if let dictionary = json as? [String: Any] {
-                                                 if let video = dictionary["url"] as? String {
-                                                     self!.cameraController.videoUrlNew = video
-                                                 }
-                                                 if let video = dictionary["video"] as? String {
-                                                     self!.cameraController.videoLink = video
-                                                 }
-                                                 if let lenspos = dictionary["lenspos"] as? Float {
-                                                     self!.cameraController.lensPosition = lenspos
-                                                 }
-                                                 if let trial = dictionary["trial"] as? String {
-                                                     self!.cameraController.trialLink = trial
-                                                 }
+                                                if let video = dictionary["video"] as? String {
+                                                    self!.cameraController.videoLink = video
+                                                }
                                                  if let status = dictionary["status"] as? String {
                                                      print(status)
                                                      if self!.previousStatus != status, status == "recording" {

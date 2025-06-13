@@ -30,8 +30,8 @@
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
-	<key>NSCameraUsageDescription</key>
-	<string>${PRODUCT_NAME} records human motion in a synchronized multi-camera system.</string>
+       <key>NSCameraUsageDescription</key>
+       <string>${PRODUCT_NAME} records human motion using a single camera.</string>
 	<key>NSDocumentsFolderUsageDescription</key>
 	<string>${PRODUCT_NAME} stores videos for motion recognition.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

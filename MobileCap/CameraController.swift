@@ -37,13 +37,9 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
     var apiUrl = ""
     var sessionStatusUrl = ""
     var presignedUrl = ""
-    var trialLink: String?
     var videoLink: String?
     var uploadVideoRequest: UploadRequest?
 
-    var videoUrlNew: String?
-
-    var lensPosition = Float(0.8)
     var bestFormat: AVCaptureDevice.Format?
     weak var delegate: CameraControllerDelegate?
     
@@ -61,7 +57,7 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
             self.presignedUrl = stringValue.replacingOccurrences(of: "/status", with: "") + "get_presigned_url/"
             print(self.sessionStatusUrl)
             self.delegate?.didScanQRCode()
-            self.setFixedFocus()
+            self.setAutoFocus()
         }
     }
 
@@ -259,19 +255,6 @@ class CameraController: NSObject, AVCaptureMetadataOutputObjectsDelegate, AVCapt
         return Int(maxFrameRate)
     }
     
-    func setFixedFocus() {
-        do {
-            try self.frontCamera?.lockForConfiguration()
-            self.frontCamera?.setFocusModeLocked(lensPosition: self.lensPosition) { _ in
-                print("Focus locked at position: \(self.lensPosition)")
-            }
-            
-            self.frontCamera?.unlockForConfiguration()
-        }
-        catch {
-            print("Failed to lock focus: \(error)")
-        }
-    }
     
     func stopRecording() {
         self.videoOutput?.stopRecording()
